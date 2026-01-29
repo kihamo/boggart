@@ -59,7 +59,8 @@ func NewUpdateConfigurationOK() *UpdateConfigurationOK {
 	return &UpdateConfigurationOK{}
 }
 
-/*UpdateConfigurationOK handles this case with default header values.
+/*
+UpdateConfigurationOK handles this case with default header values.
 
 OK
 */
@@ -92,7 +93,8 @@ func NewUpdateConfigurationBadRequest() *UpdateConfigurationBadRequest {
 	return &UpdateConfigurationBadRequest{}
 }
 
-/*UpdateConfigurationBadRequest handles this case with default header values.
+/*
+UpdateConfigurationBadRequest handles this case with default header values.
 
 Configuration of the thing is not valid.
 */
@@ -113,7 +115,8 @@ func NewUpdateConfigurationNotFound() *UpdateConfigurationNotFound {
 	return &UpdateConfigurationNotFound{}
 }
 
-/*UpdateConfigurationNotFound handles this case with default header values.
+/*
+UpdateConfigurationNotFound handles this case with default header values.
 
 Thing not found
 */
@@ -134,7 +137,8 @@ func NewUpdateConfigurationConflict() *UpdateConfigurationConflict {
 	return &UpdateConfigurationConflict{}
 }
 
-/*UpdateConfigurationConflict handles this case with default header values.
+/*
+UpdateConfigurationConflict handles this case with default header values.
 
 Thing could not be updated as it is not editable.
 */

@@ -50,7 +50,8 @@ func NewUpdateFirmwareOK() *UpdateFirmwareOK {
 	return &UpdateFirmwareOK{}
 }
 
-/*UpdateFirmwareOK handles this case with default header values.
+/*
+UpdateFirmwareOK handles this case with default header values.
 
 OK
 */
@@ -71,7 +72,8 @@ func NewUpdateFirmwareBadRequest() *UpdateFirmwareBadRequest {
 	return &UpdateFirmwareBadRequest{}
 }
 
-/*UpdateFirmwareBadRequest handles this case with default header values.
+/*
+UpdateFirmwareBadRequest handles this case with default header values.
 
 Firmware update preconditions not satisfied.
 */
@@ -92,7 +94,8 @@ func NewUpdateFirmwareNotFound() *UpdateFirmwareNotFound {
 	return &UpdateFirmwareNotFound{}
 }
 
-/*UpdateFirmwareNotFound handles this case with default header values.
+/*
+UpdateFirmwareNotFound handles this case with default header values.
 
 Thing not found.
 */

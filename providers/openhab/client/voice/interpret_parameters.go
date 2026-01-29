@@ -56,7 +56,8 @@ func NewInterpretParamsWithHTTPClient(client *http.Client) *InterpretParams {
 	}
 }
 
-/*InterpretParams contains all the parameters to send to the API endpoint
+/*
+InterpretParams contains all the parameters to send to the API endpoint
 for the interpret operation typically these are written to a http.Request
 */
 type InterpretParams struct {

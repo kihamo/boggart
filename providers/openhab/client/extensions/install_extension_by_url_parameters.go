@@ -56,7 +56,8 @@ func NewInstallExtensionByURLParamsWithHTTPClient(client *http.Client) *InstallE
 	}
 }
 
-/*InstallExtensionByURLParams contains all the parameters to send to the API endpoint
+/*
+InstallExtensionByURLParams contains all the parameters to send to the API endpoint
 for the install extension by URL operation typically these are written to a http.Request
 */
 type InstallExtensionByURLParams struct {

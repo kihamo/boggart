@@ -45,7 +45,8 @@ func NewShowSystemOK() *ShowSystemOK {
 	return &ShowSystemOK{}
 }
 
-/* ShowSystemOK describes a response with status code 200, with default header values.
+/*
+	ShowSystemOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -77,7 +78,8 @@ func NewShowSystemUnauthorized() *ShowSystemUnauthorized {
 	return &ShowSystemUnauthorized{}
 }
 
-/* ShowSystemUnauthorized describes a response with status code 401, with default header values.
+/*
+	ShowSystemUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized operation
 */

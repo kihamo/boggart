@@ -56,7 +56,8 @@ func NewGetAppDeviceIDParamsWithHTTPClient(client *http.Client) *GetAppDeviceIDP
 	}
 }
 
-/*GetAppDeviceIDParams contains all the parameters to send to the API endpoint
+/*
+GetAppDeviceIDParams contains all the parameters to send to the API endpoint
 for the get app device ID operation typically these are written to a http.Request
 */
 type GetAppDeviceIDParams struct {

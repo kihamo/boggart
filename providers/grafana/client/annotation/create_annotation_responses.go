@@ -42,7 +42,8 @@ func NewCreateAnnotationOK() *CreateAnnotationOK {
 	return &CreateAnnotationOK{}
 }
 
-/*CreateAnnotationOK handles this case with default header values.
+/*
+CreateAnnotationOK handles this case with default header values.
 
 Successful operation
 */
@@ -70,7 +71,8 @@ func (o *CreateAnnotationOK) readResponse(response runtime.ClientResponse, consu
 	return nil
 }
 
-/*CreateAnnotationBody create annotation body
+/*
+CreateAnnotationBody create annotation body
 swagger:model CreateAnnotationBody
 */
 type CreateAnnotationBody struct {

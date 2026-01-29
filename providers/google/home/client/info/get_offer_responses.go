@@ -42,7 +42,8 @@ func NewGetOfferOK() *GetOfferOK {
 	return &GetOfferOK{}
 }
 
-/*GetOfferOK handles this case with default header values.
+/*
+GetOfferOK handles this case with default header values.
 
 returned new token
 */
@@ -70,7 +71,8 @@ func (o *GetOfferOK) readResponse(response runtime.ClientResponse, consumer runt
 	return nil
 }
 
-/*GetOfferOKBody get offer o k body
+/*
+GetOfferOKBody get offer o k body
 swagger:model GetOfferOKBody
 */
 type GetOfferOKBody struct {

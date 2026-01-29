@@ -37,7 +37,8 @@ func NewGetRootDefault(code int) *GetRootDefault {
 	}
 }
 
-/*GetRootDefault handles this case with default header values.
+/*
+GetRootDefault handles this case with default header values.
 
 successful operation
 */

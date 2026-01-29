@@ -38,7 +38,8 @@ func NewGetSitemapDataOK() *GetSitemapDataOK {
 	return &GetSitemapDataOK{}
 }
 
-/*GetSitemapDataOK handles this case with default header values.
+/*
+GetSitemapDataOK handles this case with default header values.
 
 OK
 */

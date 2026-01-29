@@ -50,7 +50,8 @@ func NewRemoveMetadataOK() *RemoveMetadataOK {
 	return &RemoveMetadataOK{}
 }
 
-/*RemoveMetadataOK handles this case with default header values.
+/*
+RemoveMetadataOK handles this case with default header values.
 
 OK
 */
@@ -71,7 +72,8 @@ func NewRemoveMetadataNotFound() *RemoveMetadataNotFound {
 	return &RemoveMetadataNotFound{}
 }
 
-/*RemoveMetadataNotFound handles this case with default header values.
+/*
+RemoveMetadataNotFound handles this case with default header values.
 
 Item not found.
 */
@@ -92,7 +94,8 @@ func NewRemoveMetadataMethodNotAllowed() *RemoveMetadataMethodNotAllowed {
 	return &RemoveMetadataMethodNotAllowed{}
 }
 
-/*RemoveMetadataMethodNotAllowed handles this case with default header values.
+/*
+RemoveMetadataMethodNotAllowed handles this case with default header values.
 
 Meta data not editable.
 */

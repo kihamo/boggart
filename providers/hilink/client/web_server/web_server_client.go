@@ -34,7 +34,7 @@ type ClientService interface {
 }
 
 /*
-  GetWebServerSession get web server session API
+GetWebServerSession get web server session API
 */
 func (a *Client) GetWebServerSession(params *GetWebServerSessionParams, opts ...ClientOption) (*GetWebServerSessionOK, error) {
 	// TODO: Validate the params before sending

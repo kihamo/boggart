@@ -52,10 +52,12 @@ func NewShowVersionParamsWithHTTPClient(client *http.Client) *ShowVersionParams 
 	}
 }
 
-/* ShowVersionParams contains all the parameters to send to the API endpoint
-   for the show version operation.
+/*
+ShowVersionParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the show version operation.
+
+	Typically these are written to a http.Request.
 */
 type ShowVersionParams struct {
 	timeout    time.Duration

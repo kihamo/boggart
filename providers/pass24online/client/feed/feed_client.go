@@ -31,7 +31,7 @@ type ClientService interface {
 }
 
 /*
-  GetFeed get feed API
+GetFeed get feed API
 */
 func (a *Client) GetFeed(params *GetFeedParams, authInfo runtime.ClientAuthInfoWriter) (*GetFeedOK, error) {
 	// TODO: Validate the params before sending

@@ -56,7 +56,8 @@ func NewGetByUIDParamsWithHTTPClient(client *http.Client) *GetByUIDParams {
 	}
 }
 
-/*GetByUIDParams contains all the parameters to send to the API endpoint
+/*
+GetByUIDParams contains all the parameters to send to the API endpoint
 for the get by UID operation typically these are written to a http.Request
 */
 type GetByUIDParams struct {

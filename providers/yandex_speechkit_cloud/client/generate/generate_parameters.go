@@ -57,7 +57,8 @@ func NewGenerateParamsWithHTTPClient(client *http.Client) *GenerateParams {
 	}
 }
 
-/*GenerateParams contains all the parameters to send to the API endpoint
+/*
+GenerateParams contains all the parameters to send to the API endpoint
 for the generate operation typically these are written to a http.Request
 */
 type GenerateParams struct {

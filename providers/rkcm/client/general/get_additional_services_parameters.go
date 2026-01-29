@@ -56,7 +56,8 @@ func NewGetAdditionalServicesParamsWithHTTPClient(client *http.Client) *GetAddit
 	}
 }
 
-/*GetAdditionalServicesParams contains all the parameters to send to the API endpoint
+/*
+GetAdditionalServicesParams contains all the parameters to send to the API endpoint
 for the get additional services operation typically these are written to a http.Request
 */
 type GetAdditionalServicesParams struct {

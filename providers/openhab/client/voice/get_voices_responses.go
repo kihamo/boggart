@@ -38,7 +38,8 @@ func NewGetVoicesOK() *GetVoicesOK {
 	return &GetVoicesOK{}
 }
 
-/*GetVoicesOK handles this case with default header values.
+/*
+GetVoicesOK handles this case with default header values.
 
 OK
 */

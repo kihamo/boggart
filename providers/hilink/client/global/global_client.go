@@ -34,7 +34,7 @@ type ClientService interface {
 }
 
 /*
-  GetGlobalModuleSwitch get global module switch API
+GetGlobalModuleSwitch get global module switch API
 */
 func (a *Client) GetGlobalModuleSwitch(params *GetGlobalModuleSwitchParams, opts ...ClientOption) (*GetGlobalModuleSwitchOK, error) {
 	// TODO: Validate the params before sending

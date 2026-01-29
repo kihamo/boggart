@@ -49,7 +49,8 @@ func NewGetNetStatusOK() *GetNetStatusOK {
 	return &GetNetStatusOK{}
 }
 
-/*GetNetStatusOK handles this case with default header values.
+/*
+GetNetStatusOK handles this case with default header values.
 
 Successful operation
 */
@@ -84,7 +85,8 @@ func NewGetNetStatusDefault(code int) *GetNetStatusDefault {
 	}
 }
 
-/*GetNetStatusDefault handles this case with default header values.
+/*
+GetNetStatusDefault handles this case with default header values.
 
 Unexpected error
 */
@@ -119,7 +121,8 @@ func (o *GetNetStatusDefault) readResponse(response runtime.ClientResponse, cons
 	return nil
 }
 
-/*GetNetStatusOKBody get net status o k body
+/*
+GetNetStatusOKBody get net status o k body
 swagger:model GetNetStatusOKBody
 */
 type GetNetStatusOKBody struct {

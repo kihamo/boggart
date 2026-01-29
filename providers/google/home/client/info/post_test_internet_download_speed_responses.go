@@ -44,7 +44,8 @@ func NewPostTestInternetDownloadSpeedOK() *PostTestInternetDownloadSpeedOK {
 	return &PostTestInternetDownloadSpeedOK{}
 }
 
-/*PostTestInternetDownloadSpeedOK handles this case with default header values.
+/*
+PostTestInternetDownloadSpeedOK handles this case with default header values.
 
 returned test result
 */
@@ -72,7 +73,8 @@ func (o *PostTestInternetDownloadSpeedOK) readResponse(response runtime.ClientRe
 	return nil
 }
 
-/*PostTestInternetDownloadSpeedBody post test internet download speed body
+/*
+PostTestInternetDownloadSpeedBody post test internet download speed body
 swagger:model PostTestInternetDownloadSpeedBody
 */
 type PostTestInternetDownloadSpeedBody struct {

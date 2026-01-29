@@ -51,7 +51,8 @@ func NewDeleteConfigurationOK() *DeleteConfigurationOK {
 	return &DeleteConfigurationOK{}
 }
 
-/*DeleteConfigurationOK handles this case with default header values.
+/*
+DeleteConfigurationOK handles this case with default header values.
 
 OK
 */
@@ -82,7 +83,8 @@ func NewDeleteConfigurationNoContent() *DeleteConfigurationNoContent {
 	return &DeleteConfigurationNoContent{}
 }
 
-/*DeleteConfigurationNoContent handles this case with default header values.
+/*
+DeleteConfigurationNoContent handles this case with default header values.
 
 No old configuration
 */
@@ -103,7 +105,8 @@ func NewDeleteConfigurationInternalServerError() *DeleteConfigurationInternalSer
 	return &DeleteConfigurationInternalServerError{}
 }
 
-/*DeleteConfigurationInternalServerError handles this case with default header values.
+/*
+DeleteConfigurationInternalServerError handles this case with default header values.
 
 Configuration can not be deleted due to internal error
 */

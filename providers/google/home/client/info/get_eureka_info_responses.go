@@ -41,7 +41,8 @@ func NewGetEurekaInfoOK() *GetEurekaInfoOK {
 	return &GetEurekaInfoOK{}
 }
 
-/*GetEurekaInfoOK handles this case with default header values.
+/*
+GetEurekaInfoOK handles this case with default header values.
 
 returned device information
 */

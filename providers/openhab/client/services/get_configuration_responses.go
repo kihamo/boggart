@@ -45,7 +45,8 @@ func NewGetConfigurationOK() *GetConfigurationOK {
 	return &GetConfigurationOK{}
 }
 
-/*GetConfigurationOK handles this case with default header values.
+/*
+GetConfigurationOK handles this case with default header values.
 
 OK
 */
@@ -76,7 +77,8 @@ func NewGetConfigurationInternalServerError() *GetConfigurationInternalServerErr
 	return &GetConfigurationInternalServerError{}
 }
 
-/*GetConfigurationInternalServerError handles this case with default header values.
+/*
+GetConfigurationInternalServerError handles this case with default header values.
 
 Configuration can not be read due to internal error
 */

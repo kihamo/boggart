@@ -47,7 +47,8 @@ func NewGetByIPOK() *GetByIPOK {
 	return &GetByIPOK{}
 }
 
-/*GetByIPOK handles this case with default header values.
+/*
+GetByIPOK handles this case with default header values.
 
 Successful operation
 */
@@ -82,7 +83,8 @@ func NewGetByIPDefault(code int) *GetByIPDefault {
 	}
 }
 
-/*GetByIPDefault handles this case with default header values.
+/*
+GetByIPDefault handles this case with default header values.
 
 Unexpected error
 */

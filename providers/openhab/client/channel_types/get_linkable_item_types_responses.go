@@ -51,7 +51,8 @@ func NewGetLinkableItemTypesOK() *GetLinkableItemTypesOK {
 	return &GetLinkableItemTypesOK{}
 }
 
-/*GetLinkableItemTypesOK handles this case with default header values.
+/*
+GetLinkableItemTypesOK handles this case with default header values.
 
 OK
 */
@@ -82,7 +83,8 @@ func NewGetLinkableItemTypesNoContent() *GetLinkableItemTypesNoContent {
 	return &GetLinkableItemTypesNoContent{}
 }
 
-/*GetLinkableItemTypesNoContent handles this case with default header values.
+/*
+GetLinkableItemTypesNoContent handles this case with default header values.
 
 No content: channel type has no linkable items or is no trigger channel.
 */
@@ -103,7 +105,8 @@ func NewGetLinkableItemTypesNotFound() *GetLinkableItemTypesNotFound {
 	return &GetLinkableItemTypesNotFound{}
 }
 
-/*GetLinkableItemTypesNotFound handles this case with default header values.
+/*
+GetLinkableItemTypesNotFound handles this case with default header values.
 
 Given channel type UID not found.
 */

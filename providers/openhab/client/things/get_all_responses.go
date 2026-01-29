@@ -41,7 +41,8 @@ func NewGetAllOK() *GetAllOK {
 	return &GetAllOK{}
 }
 
-/*GetAllOK handles this case with default header values.
+/*
+GetAllOK handles this case with default header values.
 
 OK
 */

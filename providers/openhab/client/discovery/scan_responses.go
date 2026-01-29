@@ -39,7 +39,8 @@ func NewScanOK() *ScanOK {
 	return &ScanOK{}
 }
 
-/*ScanOK handles this case with default header values.
+/*
+ScanOK handles this case with default header values.
 
 OK
 */

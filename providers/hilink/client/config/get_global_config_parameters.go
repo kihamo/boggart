@@ -52,10 +52,12 @@ func NewGetGlobalConfigParamsWithHTTPClient(client *http.Client) *GetGlobalConfi
 	}
 }
 
-/* GetGlobalConfigParams contains all the parameters to send to the API endpoint
-   for the get global config operation.
+/*
+GetGlobalConfigParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get global config operation.
+
+	Typically these are written to a http.Request.
 */
 type GetGlobalConfigParams struct {
 	timeout    time.Duration

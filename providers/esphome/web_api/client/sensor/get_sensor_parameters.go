@@ -56,7 +56,8 @@ func NewGetSensorParamsWithHTTPClient(client *http.Client) *GetSensorParams {
 	}
 }
 
-/*GetSensorParams contains all the parameters to send to the API endpoint
+/*
+GetSensorParams contains all the parameters to send to the API endpoint
 for the get sensor operation typically these are written to a http.Request
 */
 type GetSensorParams struct {

@@ -56,7 +56,8 @@ func NewUnignoreParamsWithHTTPClient(client *http.Client) *UnignoreParams {
 	}
 }
 
-/*UnignoreParams contains all the parameters to send to the API endpoint
+/*
+UnignoreParams contains all the parameters to send to the API endpoint
 for the unignore operation typically these are written to a http.Request
 */
 type UnignoreParams struct {

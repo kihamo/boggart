@@ -44,7 +44,8 @@ func NewInstallExtensionByURLOK() *InstallExtensionByURLOK {
 	return &InstallExtensionByURLOK{}
 }
 
-/*InstallExtensionByURLOK handles this case with default header values.
+/*
+InstallExtensionByURLOK handles this case with default header values.
 
 OK
 */
@@ -65,7 +66,8 @@ func NewInstallExtensionByURLBadRequest() *InstallExtensionByURLBadRequest {
 	return &InstallExtensionByURLBadRequest{}
 }
 
-/*InstallExtensionByURLBadRequest handles this case with default header values.
+/*
+InstallExtensionByURLBadRequest handles this case with default header values.
 
 The given URL is malformed or not valid.
 */

@@ -56,7 +56,8 @@ func NewCreateAnnotationParamsWithHTTPClient(client *http.Client) *CreateAnnotat
 	}
 }
 
-/*CreateAnnotationParams contains all the parameters to send to the API endpoint
+/*
+CreateAnnotationParams contains all the parameters to send to the API endpoint
 for the create annotation operation typically these are written to a http.Request
 */
 type CreateAnnotationParams struct {

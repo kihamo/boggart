@@ -46,7 +46,8 @@ func NewGetUSSDOK() *GetUSSDOK {
 	return &GetUSSDOK{}
 }
 
-/* GetUSSDOK describes a response with status code 200, with default header values.
+/*
+	GetUSSDOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -80,7 +81,8 @@ func NewGetUSSDDefault(code int) *GetUSSDDefault {
 	}
 }
 
-/* GetUSSDDefault describes a response with status code -1, with default header values.
+/*
+	GetUSSDDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */

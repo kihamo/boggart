@@ -58,7 +58,8 @@ func NewGetNetStatusParamsWithHTTPClient(client *http.Client) *GetNetStatusParam
 	}
 }
 
-/*GetNetStatusParams contains all the parameters to send to the API endpoint
+/*
+GetNetStatusParams contains all the parameters to send to the API endpoint
 for the get net status operation typically these are written to a http.Request
 */
 type GetNetStatusParams struct {

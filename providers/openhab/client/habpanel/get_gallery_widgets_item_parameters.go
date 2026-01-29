@@ -56,7 +56,8 @@ func NewGetGalleryWidgetsItemParamsWithHTTPClient(client *http.Client) *GetGalle
 	}
 }
 
-/*GetGalleryWidgetsItemParams contains all the parameters to send to the API endpoint
+/*
+GetGalleryWidgetsItemParams contains all the parameters to send to the API endpoint
 for the get gallery widgets item operation typically these are written to a http.Request
 */
 type GetGalleryWidgetsItemParams struct {

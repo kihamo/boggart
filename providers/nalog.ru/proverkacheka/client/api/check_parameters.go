@@ -57,7 +57,8 @@ func NewCheckParamsWithHTTPClient(client *http.Client) *CheckParams {
 	}
 }
 
-/*CheckParams contains all the parameters to send to the API endpoint
+/*
+CheckParams contains all the parameters to send to the API endpoint
 for the check operation typically these are written to a http.Request
 */
 type CheckParams struct {

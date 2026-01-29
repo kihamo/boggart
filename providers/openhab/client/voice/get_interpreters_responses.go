@@ -38,7 +38,8 @@ func NewGetInterpretersOK() *GetInterpretersOK {
 	return &GetInterpretersOK{}
 }
 
-/*GetInterpretersOK handles this case with default header values.
+/*
+GetInterpretersOK handles this case with default header values.
 
 OK
 */

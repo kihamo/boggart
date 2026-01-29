@@ -56,7 +56,8 @@ func NewPutItemStateParamsWithHTTPClient(client *http.Client) *PutItemStateParam
 	}
 }
 
-/*PutItemStateParams contains all the parameters to send to the API endpoint
+/*
+PutItemStateParams contains all the parameters to send to the API endpoint
 for the put item state operation typically these are written to a http.Request
 */
 type PutItemStateParams struct {

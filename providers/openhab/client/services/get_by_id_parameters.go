@@ -56,7 +56,8 @@ func NewGetByIDParamsWithHTTPClient(client *http.Client) *GetByIDParams {
 	}
 }
 
-/*GetByIDParams contains all the parameters to send to the API endpoint
+/*
+GetByIDParams contains all the parameters to send to the API endpoint
 for the get by Id operation typically these are written to a http.Request
 */
 type GetByIDParams struct {

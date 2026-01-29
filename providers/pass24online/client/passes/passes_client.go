@@ -33,7 +33,7 @@ type ClientService interface {
 }
 
 /*
-  GetPassByID get pass by ID API
+GetPassByID get pass by ID API
 */
 func (a *Client) GetPassByID(params *GetPassByIDParams, authInfo runtime.ClientAuthInfoWriter) (*GetPassByIDOK, error) {
 	// TODO: Validate the params before sending
@@ -67,7 +67,7 @@ func (a *Client) GetPassByID(params *GetPassByIDParams, authInfo runtime.ClientA
 }
 
 /*
-  GetPasses get passes API
+GetPasses get passes API
 */
 func (a *Client) GetPasses(params *GetPassesParams, authInfo runtime.ClientAuthInfoWriter) (*GetPassesOK, error) {
 	// TODO: Validate the params before sending

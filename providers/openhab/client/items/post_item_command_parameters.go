@@ -56,7 +56,8 @@ func NewPostItemCommandParamsWithHTTPClient(client *http.Client) *PostItemComman
 	}
 }
 
-/*PostItemCommandParams contains all the parameters to send to the API endpoint
+/*
+PostItemCommandParams contains all the parameters to send to the API endpoint
 for the post item command operation typically these are written to a http.Request
 */
 type PostItemCommandParams struct {

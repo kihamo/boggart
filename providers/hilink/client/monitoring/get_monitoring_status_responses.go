@@ -46,7 +46,8 @@ func NewGetMonitoringStatusOK() *GetMonitoringStatusOK {
 	return &GetMonitoringStatusOK{}
 }
 
-/* GetMonitoringStatusOK describes a response with status code 200, with default header values.
+/*
+	GetMonitoringStatusOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -80,7 +81,8 @@ func NewGetMonitoringStatusDefault(code int) *GetMonitoringStatusDefault {
 	}
 }
 
-/* GetMonitoringStatusDefault describes a response with status code -1, with default header values.
+/*
+	GetMonitoringStatusDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */

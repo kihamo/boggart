@@ -31,7 +31,7 @@ type ClientService interface {
 }
 
 /*
-  Login login API
+Login login API
 */
 func (a *Client) Login(params *LoginParams) (*LoginOK, error) {
 	// TODO: Validate the params before sending

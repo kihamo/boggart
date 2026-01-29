@@ -50,7 +50,8 @@ func NewPutItemStateAccepted() *PutItemStateAccepted {
 	return &PutItemStateAccepted{}
 }
 
-/*PutItemStateAccepted handles this case with default header values.
+/*
+PutItemStateAccepted handles this case with default header values.
 
 Accepted
 */
@@ -71,7 +72,8 @@ func NewPutItemStateBadRequest() *PutItemStateBadRequest {
 	return &PutItemStateBadRequest{}
 }
 
-/*PutItemStateBadRequest handles this case with default header values.
+/*
+PutItemStateBadRequest handles this case with default header values.
 
 Item state null
 */
@@ -92,7 +94,8 @@ func NewPutItemStateNotFound() *PutItemStateNotFound {
 	return &PutItemStateNotFound{}
 }
 
-/*PutItemStateNotFound handles this case with default header values.
+/*
+PutItemStateNotFound handles this case with default header values.
 
 Item not found
 */

@@ -56,7 +56,8 @@ func NewGetDebtByAccountParamsWithHTTPClient(client *http.Client) *GetDebtByAcco
 	}
 }
 
-/*GetDebtByAccountParams contains all the parameters to send to the API endpoint
+/*
+GetDebtByAccountParams contains all the parameters to send to the API endpoint
 for the get debt by account operation typically these are written to a http.Request
 */
 type GetDebtByAccountParams struct {

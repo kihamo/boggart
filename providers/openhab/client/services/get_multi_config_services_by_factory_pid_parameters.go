@@ -56,7 +56,8 @@ func NewGetMultiConfigServicesByFactoryPidParamsWithHTTPClient(client *http.Clie
 	}
 }
 
-/*GetMultiConfigServicesByFactoryPidParams contains all the parameters to send to the API endpoint
+/*
+GetMultiConfigServicesByFactoryPidParams contains all the parameters to send to the API endpoint
 for the get multi config services by factory pid operation typically these are written to a http.Request
 */
 type GetMultiConfigServicesByFactoryPidParams struct {

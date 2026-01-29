@@ -41,7 +41,8 @@ func NewGetSupportedTimezonesOK() *GetSupportedTimezonesOK {
 	return &GetSupportedTimezonesOK{}
 }
 
-/*GetSupportedTimezonesOK handles this case with default header values.
+/*
+GetSupportedTimezonesOK handles this case with default header values.
 
 returned supported timezones list
 */

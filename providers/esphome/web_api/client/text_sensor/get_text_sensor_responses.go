@@ -41,7 +41,8 @@ func NewGetTextSensorOK() *GetTextSensorOK {
 	return &GetTextSensorOK{}
 }
 
-/*GetTextSensorOK handles this case with default header values.
+/*
+GetTextSensorOK handles this case with default header values.
 
 Successful operation
 */

@@ -11,7 +11,7 @@ type StateHandler struct {
 	Component mqtt.Component
 }
 
-//nolint
+// nolint
 func (h *StateHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	client := h.Component.Client()
 

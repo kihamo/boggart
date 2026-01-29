@@ -57,7 +57,8 @@ func NewGetByLatLngParamsWithHTTPClient(client *http.Client) *GetByLatLngParams 
 	}
 }
 
-/*GetByLatLngParams contains all the parameters to send to the API endpoint
+/*
+GetByLatLngParams contains all the parameters to send to the API endpoint
 for the get by lat lng operation typically these are written to a http.Request
 */
 type GetByLatLngParams struct {

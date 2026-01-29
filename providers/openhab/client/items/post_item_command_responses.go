@@ -50,7 +50,8 @@ func NewPostItemCommandOK() *PostItemCommandOK {
 	return &PostItemCommandOK{}
 }
 
-/*PostItemCommandOK handles this case with default header values.
+/*
+PostItemCommandOK handles this case with default header values.
 
 OK
 */
@@ -71,7 +72,8 @@ func NewPostItemCommandBadRequest() *PostItemCommandBadRequest {
 	return &PostItemCommandBadRequest{}
 }
 
-/*PostItemCommandBadRequest handles this case with default header values.
+/*
+PostItemCommandBadRequest handles this case with default header values.
 
 Item command null
 */
@@ -92,7 +94,8 @@ func NewPostItemCommandNotFound() *PostItemCommandNotFound {
 	return &PostItemCommandNotFound{}
 }
 
-/*PostItemCommandNotFound handles this case with default header values.
+/*
+PostItemCommandNotFound handles this case with default header values.
 
 Item not found
 */

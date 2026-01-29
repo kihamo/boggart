@@ -52,10 +52,12 @@ func NewGetGlobalModuleSwitchParamsWithHTTPClient(client *http.Client) *GetGloba
 	}
 }
 
-/* GetGlobalModuleSwitchParams contains all the parameters to send to the API endpoint
-   for the get global module switch operation.
+/*
+GetGlobalModuleSwitchParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get global module switch operation.
+
+	Typically these are written to a http.Request.
 */
 type GetGlobalModuleSwitchParams struct {
 	timeout    time.Duration

@@ -45,7 +45,8 @@ func NewGetStatusOK() *GetStatusOK {
 	return &GetStatusOK{}
 }
 
-/*GetStatusOK handles this case with default header values.
+/*
+GetStatusOK handles this case with default header values.
 
 OK
 */
@@ -76,7 +77,8 @@ func NewGetStatusNotFound() *GetStatusNotFound {
 	return &GetStatusNotFound{}
 }
 
-/*GetStatusNotFound handles this case with default header values.
+/*
+GetStatusNotFound handles this case with default header values.
 
 Thing not found.
 */

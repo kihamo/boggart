@@ -38,7 +38,8 @@ func NewGetSinksOK() *GetSinksOK {
 	return &GetSinksOK{}
 }
 
-/*GetSinksOK handles this case with default header values.
+/*
+GetSinksOK handles this case with default header values.
 
 OK
 */

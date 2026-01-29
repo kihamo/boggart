@@ -46,7 +46,8 @@ func NewGetWebServerSessionOK() *GetWebServerSessionOK {
 	return &GetWebServerSessionOK{}
 }
 
-/* GetWebServerSessionOK describes a response with status code 200, with default header values.
+/*
+	GetWebServerSessionOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -80,7 +81,8 @@ func NewGetWebServerSessionDefault(code int) *GetWebServerSessionDefault {
 	}
 }
 
-/* GetWebServerSessionDefault describes a response with status code -1, with default header values.
+/*
+	GetWebServerSessionDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */

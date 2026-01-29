@@ -52,10 +52,12 @@ func NewGetMonitoringTrafficStatisticsParamsWithHTTPClient(client *http.Client) 
 	}
 }
 
-/* GetMonitoringTrafficStatisticsParams contains all the parameters to send to the API endpoint
-   for the get monitoring traffic statistics operation.
+/*
+GetMonitoringTrafficStatisticsParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get monitoring traffic statistics operation.
+
+	Typically these are written to a http.Request.
 */
 type GetMonitoringTrafficStatisticsParams struct {
 	timeout    time.Duration

@@ -44,7 +44,8 @@ func NewDeleteOK() *DeleteOK {
 	return &DeleteOK{}
 }
 
-/*DeleteOK handles this case with default header values.
+/*
+DeleteOK handles this case with default header values.
 
 OK
 */
@@ -65,7 +66,8 @@ func NewDeleteNotFound() *DeleteNotFound {
 	return &DeleteNotFound{}
 }
 
-/*DeleteNotFound handles this case with default header values.
+/*
+DeleteNotFound handles this case with default header values.
 
 Discovery result not found in the inbox.
 */

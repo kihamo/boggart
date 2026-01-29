@@ -42,7 +42,8 @@ func NewSetObjStateOK() *SetObjStateOK {
 	return &SetObjStateOK{}
 }
 
-/* SetObjStateOK describes a response with status code 200, with default header values.
+/*
+	SetObjStateOK describes a response with status code 200, with default header values.
 
 Successful login
 */
@@ -69,7 +70,8 @@ func (o *SetObjStateOK) readResponse(response runtime.ClientResponse, consumer r
 	return nil
 }
 
-/*SetObjStateBody set obj state body
+/*
+SetObjStateBody set obj state body
 swagger:model SetObjStateBody
 */
 type SetObjStateBody struct {

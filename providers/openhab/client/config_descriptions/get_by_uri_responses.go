@@ -53,7 +53,8 @@ func NewGetByURIOK() *GetByURIOK {
 	return &GetByURIOK{}
 }
 
-/*GetByURIOK handles this case with default header values.
+/*
+GetByURIOK handles this case with default header values.
 
 OK
 */
@@ -86,7 +87,8 @@ func NewGetByURIBadRequest() *GetByURIBadRequest {
 	return &GetByURIBadRequest{}
 }
 
-/*GetByURIBadRequest handles this case with default header values.
+/*
+GetByURIBadRequest handles this case with default header values.
 
 Invalid URI syntax
 */
@@ -107,7 +109,8 @@ func NewGetByURINotFound() *GetByURINotFound {
 	return &GetByURINotFound{}
 }
 
-/*GetByURINotFound handles this case with default header values.
+/*
+GetByURINotFound handles this case with default header values.
 
 Not found
 */

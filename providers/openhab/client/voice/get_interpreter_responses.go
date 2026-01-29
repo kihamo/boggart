@@ -44,7 +44,8 @@ func NewGetInterpreterOK() *GetInterpreterOK {
 	return &GetInterpreterOK{}
 }
 
-/*GetInterpreterOK handles this case with default header values.
+/*
+GetInterpreterOK handles this case with default header values.
 
 OK
 */
@@ -65,7 +66,8 @@ func NewGetInterpreterNotFound() *GetInterpreterNotFound {
 	return &GetInterpreterNotFound{}
 }
 
-/*GetInterpreterNotFound handles this case with default header values.
+/*
+GetInterpreterNotFound handles this case with default header values.
 
 Interpreter not found
 */

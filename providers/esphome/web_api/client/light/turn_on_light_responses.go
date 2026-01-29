@@ -38,7 +38,8 @@ func NewTurnOnLightOK() *TurnOnLightOK {
 	return &TurnOnLightOK{}
 }
 
-/*TurnOnLightOK handles this case with default header values.
+/*
+TurnOnLightOK handles this case with default header values.
 
 Successful operation
 */

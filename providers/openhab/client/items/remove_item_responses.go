@@ -44,7 +44,8 @@ func NewRemoveItemOK() *RemoveItemOK {
 	return &RemoveItemOK{}
 }
 
-/*RemoveItemOK handles this case with default header values.
+/*
+RemoveItemOK handles this case with default header values.
 
 OK
 */
@@ -65,7 +66,8 @@ func NewRemoveItemNotFound() *RemoveItemNotFound {
 	return &RemoveItemNotFound{}
 }
 
-/*RemoveItemNotFound handles this case with default header values.
+/*
+RemoveItemNotFound handles this case with default header values.
 
 Item not found or item is not editable.
 */

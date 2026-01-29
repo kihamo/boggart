@@ -56,7 +56,8 @@ func NewIgnoreParamsWithHTTPClient(client *http.Client) *IgnoreParams {
 	}
 }
 
-/*IgnoreParams contains all the parameters to send to the API endpoint
+/*
+IgnoreParams contains all the parameters to send to the API endpoint
 for the ignore operation typically these are written to a http.Request
 */
 type IgnoreParams struct {

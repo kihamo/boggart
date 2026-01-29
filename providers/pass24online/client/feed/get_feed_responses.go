@@ -46,7 +46,8 @@ func NewGetFeedOK() *GetFeedOK {
 	return &GetFeedOK{}
 }
 
-/*GetFeedOK handles this case with default header values.
+/*
+GetFeedOK handles this case with default header values.
 
 Successful operation
 */
@@ -81,7 +82,8 @@ func NewGetFeedDefault(code int) *GetFeedDefault {
 	}
 }
 
-/*GetFeedDefault handles this case with default header values.
+/*
+GetFeedDefault handles this case with default header values.
 
 Unexpected error
 */

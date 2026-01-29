@@ -50,7 +50,8 @@ func NewAddMemberOK() *AddMemberOK {
 	return &AddMemberOK{}
 }
 
-/*AddMemberOK handles this case with default header values.
+/*
+AddMemberOK handles this case with default header values.
 
 OK
 */
@@ -71,7 +72,8 @@ func NewAddMemberNotFound() *AddMemberNotFound {
 	return &AddMemberNotFound{}
 }
 
-/*AddMemberNotFound handles this case with default header values.
+/*
+AddMemberNotFound handles this case with default header values.
 
 Item or member item not found or item is not of type group item.
 */
@@ -92,7 +94,8 @@ func NewAddMemberMethodNotAllowed() *AddMemberMethodNotAllowed {
 	return &AddMemberMethodNotAllowed{}
 }
 
-/*AddMemberMethodNotAllowed handles this case with default header values.
+/*
+AddMemberMethodNotAllowed handles this case with default header values.
 
 Member item is not editable.
 */

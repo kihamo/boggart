@@ -56,7 +56,8 @@ func NewGetLightParamsWithHTTPClient(client *http.Client) *GetLightParams {
 	}
 }
 
-/*GetLightParams contains all the parameters to send to the API endpoint
+/*
+GetLightParams contains all the parameters to send to the API endpoint
 for the get light operation typically these are written to a http.Request
 */
 type GetLightParams struct {

@@ -38,7 +38,8 @@ func NewGetAdditionalServicesOK() *GetAdditionalServicesOK {
 	return &GetAdditionalServicesOK{}
 }
 
-/*GetAdditionalServicesOK handles this case with default header values.
+/*
+GetAdditionalServicesOK handles this case with default header values.
 
 Successful operation
 */

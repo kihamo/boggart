@@ -63,7 +63,8 @@ func NewCreateOrUpdateItemOK() *CreateOrUpdateItemOK {
 	return &CreateOrUpdateItemOK{}
 }
 
-/*CreateOrUpdateItemOK handles this case with default header values.
+/*
+CreateOrUpdateItemOK handles this case with default header values.
 
 OK
 */
@@ -94,7 +95,8 @@ func NewCreateOrUpdateItemCreated() *CreateOrUpdateItemCreated {
 	return &CreateOrUpdateItemCreated{}
 }
 
-/*CreateOrUpdateItemCreated handles this case with default header values.
+/*
+CreateOrUpdateItemCreated handles this case with default header values.
 
 Item created.
 */
@@ -115,7 +117,8 @@ func NewCreateOrUpdateItemBadRequest() *CreateOrUpdateItemBadRequest {
 	return &CreateOrUpdateItemBadRequest{}
 }
 
-/*CreateOrUpdateItemBadRequest handles this case with default header values.
+/*
+CreateOrUpdateItemBadRequest handles this case with default header values.
 
 Item null.
 */
@@ -136,7 +139,8 @@ func NewCreateOrUpdateItemNotFound() *CreateOrUpdateItemNotFound {
 	return &CreateOrUpdateItemNotFound{}
 }
 
-/*CreateOrUpdateItemNotFound handles this case with default header values.
+/*
+CreateOrUpdateItemNotFound handles this case with default header values.
 
 Item not found.
 */
@@ -157,7 +161,8 @@ func NewCreateOrUpdateItemMethodNotAllowed() *CreateOrUpdateItemMethodNotAllowed
 	return &CreateOrUpdateItemMethodNotAllowed{}
 }
 
-/*CreateOrUpdateItemMethodNotAllowed handles this case with default header values.
+/*
+CreateOrUpdateItemMethodNotAllowed handles this case with default header values.
 
 Item not editable.
 */

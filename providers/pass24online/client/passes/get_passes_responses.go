@@ -46,7 +46,8 @@ func NewGetPassesOK() *GetPassesOK {
 	return &GetPassesOK{}
 }
 
-/*GetPassesOK handles this case with default header values.
+/*
+GetPassesOK handles this case with default header values.
 
 Successful operation
 */
@@ -81,7 +82,8 @@ func NewGetPassesDefault(code int) *GetPassesDefault {
 	}
 }
 
-/*GetPassesDefault handles this case with default header values.
+/*
+GetPassesDefault handles this case with default header values.
 
 Unexpected error
 */

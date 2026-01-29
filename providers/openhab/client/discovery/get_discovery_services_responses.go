@@ -39,7 +39,8 @@ func NewGetDiscoveryServicesOK() *GetDiscoveryServicesOK {
 	return &GetDiscoveryServicesOK{}
 }
 
-/*GetDiscoveryServicesOK handles this case with default header values.
+/*
+GetDiscoveryServicesOK handles this case with default header values.
 
 OK
 */

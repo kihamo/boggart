@@ -17,6 +17,7 @@ ZB_READ_CONFIGURATION
 This command is used to get a configuration property from nonvolatile memory.
 
 Usage:
+
 	SREQ:
 		       1      |      1      |      1      |    1
 		Length = 0x01 | Cmd0 = 0x26 | Cmd1 = 0x04 | ConfigId
@@ -66,6 +67,7 @@ ZB_WRITE_CONFIGURATION
 This command is used to write a Configuration Property to nonvolatile memory.
 
 Usage:
+
 	SREQ:
 		         1         |      1      |      1      |    1     |  1  | 1-128
 		Length = 0x03-0x83 | Cmd0 = 0x26 | Cmd1 = 0x05 | ConfigId | Len | Value

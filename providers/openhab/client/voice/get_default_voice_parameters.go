@@ -56,7 +56,8 @@ func NewGetDefaultVoiceParamsWithHTTPClient(client *http.Client) *GetDefaultVoic
 	}
 }
 
-/*GetDefaultVoiceParams contains all the parameters to send to the API endpoint
+/*
+GetDefaultVoiceParams contains all the parameters to send to the API endpoint
 for the get default voice operation typically these are written to a http.Request
 */
 type GetDefaultVoiceParams struct {

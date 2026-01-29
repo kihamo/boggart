@@ -38,7 +38,8 @@ func NewUnignoreOK() *UnignoreOK {
 	return &UnignoreOK{}
 }
 
-/*UnignoreOK handles this case with default header values.
+/*
+UnignoreOK handles this case with default header values.
 
 OK
 */

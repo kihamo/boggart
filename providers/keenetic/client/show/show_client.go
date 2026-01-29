@@ -42,7 +42,7 @@ type ClientService interface {
 }
 
 /*
-  ShowDefaults show defaults API
+ShowDefaults show defaults API
 */
 func (a *Client) ShowDefaults(params *ShowDefaultsParams, opts ...ClientOption) (*ShowDefaultsOK, error) {
 	// TODO: Validate the params before sending
@@ -80,7 +80,7 @@ func (a *Client) ShowDefaults(params *ShowDefaultsParams, opts ...ClientOption) 
 }
 
 /*
-  ShowIPHotspot show IP hotspot API
+ShowIPHotspot show IP hotspot API
 */
 func (a *Client) ShowIPHotspot(params *ShowIPHotspotParams, opts ...ClientOption) (*ShowIPHotspotOK, error) {
 	// TODO: Validate the params before sending
@@ -118,7 +118,7 @@ func (a *Client) ShowIPHotspot(params *ShowIPHotspotParams, opts ...ClientOption
 }
 
 /*
-  ShowSystem show system API
+ShowSystem show system API
 */
 func (a *Client) ShowSystem(params *ShowSystemParams, opts ...ClientOption) (*ShowSystemOK, error) {
 	// TODO: Validate the params before sending
@@ -156,7 +156,7 @@ func (a *Client) ShowSystem(params *ShowSystemParams, opts ...ClientOption) (*Sh
 }
 
 /*
-  ShowVersion show version API
+ShowVersion show version API
 */
 func (a *Client) ShowVersion(params *ShowVersionParams, opts ...ClientOption) (*ShowVersionOK, error) {
 	// TODO: Validate the params before sending

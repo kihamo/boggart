@@ -42,7 +42,8 @@ func NewGetAuthOK() *GetAuthOK {
 	return &GetAuthOK{}
 }
 
-/* GetAuthOK describes a response with status code 200, with default header values.
+/*
+	GetAuthOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -63,7 +64,8 @@ func NewGetAuthUnauthorized() *GetAuthUnauthorized {
 	return &GetAuthUnauthorized{}
 }
 
-/* GetAuthUnauthorized describes a response with status code 401, with default header values.
+/*
+	GetAuthUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized operation
 */

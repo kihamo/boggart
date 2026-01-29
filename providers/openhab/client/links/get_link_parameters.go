@@ -56,7 +56,8 @@ func NewGetLinkParamsWithHTTPClient(client *http.Client) *GetLinkParams {
 	}
 }
 
-/*GetLinkParams contains all the parameters to send to the API endpoint
+/*
+GetLinkParams contains all the parameters to send to the API endpoint
 for the get link operation typically these are written to a http.Request
 */
 type GetLinkParams struct {

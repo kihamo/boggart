@@ -41,7 +41,8 @@ func NewGetLightOK() *GetLightOK {
 	return &GetLightOK{}
 }
 
-/*GetLightOK handles this case with default header values.
+/*
+GetLightOK handles this case with default header values.
 
 Successful operation
 */

@@ -38,7 +38,8 @@ func NewGetSitemapsOK() *GetSitemapsOK {
 	return &GetSitemapsOK{}
 }
 
-/*GetSitemapsOK handles this case with default header values.
+/*
+GetSitemapsOK handles this case with default header values.
 
 OK
 */

@@ -39,7 +39,8 @@ func NewGetObjStateOK() *GetObjStateOK {
 	return &GetObjStateOK{}
 }
 
-/* GetObjStateOK describes a response with status code 200, with default header values.
+/*
+	GetObjStateOK describes a response with status code 200, with default header values.
 
 Successful login
 */

@@ -45,7 +45,8 @@ func NewSetEnabledOK() *SetEnabledOK {
 	return &SetEnabledOK{}
 }
 
-/*SetEnabledOK handles this case with default header values.
+/*
+SetEnabledOK handles this case with default header values.
 
 OK
 */
@@ -76,7 +77,8 @@ func NewSetEnabledNotFound() *SetEnabledNotFound {
 	return &SetEnabledNotFound{}
 }
 
-/*SetEnabledNotFound handles this case with default header values.
+/*
+SetEnabledNotFound handles this case with default header values.
 
 Thing not found.
 */

@@ -41,9 +41,9 @@ func (b *Buffer) ReadBool() bool {
 }
 
 /*
-	Length: 6
-	Format: BCD
-	Value: hh-mm-ss-dd-mon-yy
+Length: 6
+Format: BCD
+Value: hh-mm-ss-dd-mon-yy
 */
 func (b *Buffer) ReadTimeDate(loc *time.Location) time.Time {
 	hh, mm, ss := b.ReadBCD(1), b.ReadBCD(1), b.ReadBCD(1)
@@ -57,9 +57,9 @@ func (b *Buffer) ReadTimeDate(loc *time.Location) time.Time {
 }
 
 /*
-	Length: 7
-	Format: BCD
-	Value: dow-hh-mm-ss-dd-mon-yy
+Length: 7
+Format: BCD
+Value: dow-hh-mm-ss-dd-mon-yy
 */
 func (b *Buffer) ReadTimeDateWithDayOfWeek(loc *time.Location) time.Time {
 	b.ReadByte() // skip day of week

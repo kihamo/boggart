@@ -50,7 +50,8 @@ func NewUnlinkOK() *UnlinkOK {
 	return &UnlinkOK{}
 }
 
-/*UnlinkOK handles this case with default header values.
+/*
+UnlinkOK handles this case with default header values.
 
 OK
 */
@@ -71,7 +72,8 @@ func NewUnlinkNotFound() *UnlinkNotFound {
 	return &UnlinkNotFound{}
 }
 
-/*UnlinkNotFound handles this case with default header values.
+/*
+UnlinkNotFound handles this case with default header values.
 
 Link not found.
 */
@@ -92,7 +94,8 @@ func NewUnlinkMethodNotAllowed() *UnlinkMethodNotAllowed {
 	return &UnlinkMethodNotAllowed{}
 }
 
-/*UnlinkMethodNotAllowed handles this case with default header values.
+/*
+UnlinkMethodNotAllowed handles this case with default header values.
 
 Link not editable.
 */

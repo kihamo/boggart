@@ -56,7 +56,8 @@ func NewGetByURIParamsWithHTTPClient(client *http.Client) *GetByURIParams {
 	}
 }
 
-/*GetByURIParams contains all the parameters to send to the API endpoint
+/*
+GetByURIParams contains all the parameters to send to the API endpoint
 for the get by URI operation typically these are written to a http.Request
 */
 type GetByURIParams struct {

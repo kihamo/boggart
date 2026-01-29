@@ -52,10 +52,12 @@ func NewGetObjStateParamsWithHTTPClient(client *http.Client) *GetObjStateParams 
 	}
 }
 
-/* GetObjStateParams contains all the parameters to send to the API endpoint
-   for the get obj state operation.
+/*
+GetObjStateParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get obj state operation.
+
+	Typically these are written to a http.Request.
 */
 type GetObjStateParams struct {
 	timeout    time.Duration

@@ -56,7 +56,8 @@ func NewGetSitemapEventsParamsWithHTTPClient(client *http.Client) *GetSitemapEve
 	}
 }
 
-/*GetSitemapEventsParams contains all the parameters to send to the API endpoint
+/*
+GetSitemapEventsParams contains all the parameters to send to the API endpoint
 for the get sitemap events operation typically these are written to a http.Request
 */
 type GetSitemapEventsParams struct {

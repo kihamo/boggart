@@ -56,7 +56,8 @@ func NewGetLinkableItemTypesParamsWithHTTPClient(client *http.Client) *GetLinkab
 	}
 }
 
-/*GetLinkableItemTypesParams contains all the parameters to send to the API endpoint
+/*
+GetLinkableItemTypesParams contains all the parameters to send to the API endpoint
 for the get linkable item types operation typically these are written to a http.Request
 */
 type GetLinkableItemTypesParams struct {

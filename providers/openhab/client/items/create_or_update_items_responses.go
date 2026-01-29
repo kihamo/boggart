@@ -45,7 +45,8 @@ func NewCreateOrUpdateItemsOK() *CreateOrUpdateItemsOK {
 	return &CreateOrUpdateItemsOK{}
 }
 
-/*CreateOrUpdateItemsOK handles this case with default header values.
+/*
+CreateOrUpdateItemsOK handles this case with default header values.
 
 OK
 */
@@ -76,7 +77,8 @@ func NewCreateOrUpdateItemsBadRequest() *CreateOrUpdateItemsBadRequest {
 	return &CreateOrUpdateItemsBadRequest{}
 }
 
-/*CreateOrUpdateItemsBadRequest handles this case with default header values.
+/*
+CreateOrUpdateItemsBadRequest handles this case with default header values.
 
 Item list is null.
 */

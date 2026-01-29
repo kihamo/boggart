@@ -47,7 +47,8 @@ func NewSearchOK() *SearchOK {
 	return &SearchOK{}
 }
 
-/*SearchOK handles this case with default header values.
+/*
+SearchOK handles this case with default header values.
 
 Successful operation
 */
@@ -82,7 +83,8 @@ func NewSearchDefault(code int) *SearchDefault {
 	}
 }
 
-/*SearchDefault handles this case with default header values.
+/*
+SearchDefault handles this case with default header values.
 
 Unexpected error
 */

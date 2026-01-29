@@ -38,7 +38,7 @@ type ClientService interface {
 }
 
 /*
-  GetSensors gets sensors state
+GetSensors gets sensors state
 */
 func (a *Client) GetSensors(params *GetSensorsParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetSensorsOK, error) {
 	// TODO: Validate the params before sending
@@ -77,7 +77,7 @@ func (a *Client) GetSensors(params *GetSensorsParams, authInfo runtime.ClientAut
 }
 
 /*
-  UpdateSensor updates sensor name
+UpdateSensor updates sensor name
 */
 func (a *Client) UpdateSensor(params *UpdateSensorParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*UpdateSensorOK, error) {
 	// TODO: Validate the params before sending

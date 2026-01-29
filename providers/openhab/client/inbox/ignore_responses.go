@@ -38,7 +38,8 @@ func NewIgnoreOK() *IgnoreOK {
 	return &IgnoreOK{}
 }
 
-/*IgnoreOK handles this case with default header values.
+/*
+IgnoreOK handles this case with default header values.
 
 OK
 */

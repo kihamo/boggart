@@ -44,7 +44,8 @@ func NewGetDefaultSinkOK() *GetDefaultSinkOK {
 	return &GetDefaultSinkOK{}
 }
 
-/*GetDefaultSinkOK handles this case with default header values.
+/*
+GetDefaultSinkOK handles this case with default header values.
 
 OK
 */
@@ -65,7 +66,8 @@ func NewGetDefaultSinkNotFound() *GetDefaultSinkNotFound {
 	return &GetDefaultSinkNotFound{}
 }
 
-/*GetDefaultSinkNotFound handles this case with default header values.
+/*
+GetDefaultSinkNotFound handles this case with default header values.
 
 Sink not found
 */

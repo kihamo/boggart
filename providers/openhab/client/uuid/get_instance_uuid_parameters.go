@@ -56,7 +56,8 @@ func NewGetInstanceUUIDParamsWithHTTPClient(client *http.Client) *GetInstanceUUI
 	}
 }
 
-/*GetInstanceUUIDParams contains all the parameters to send to the API endpoint
+/*
+GetInstanceUUIDParams contains all the parameters to send to the API endpoint
 for the get instance UUID operation typically these are written to a http.Request
 */
 type GetInstanceUUIDParams struct {

@@ -47,7 +47,8 @@ func NewHTTPPutPersistenceItemDataOK() *HTTPPutPersistenceItemDataOK {
 	return &HTTPPutPersistenceItemDataOK{}
 }
 
-/*HTTPPutPersistenceItemDataOK handles this case with default header values.
+/*
+HTTPPutPersistenceItemDataOK handles this case with default header values.
 
 OK
 */
@@ -80,7 +81,8 @@ func NewHTTPPutPersistenceItemDataNotFound() *HTTPPutPersistenceItemDataNotFound
 	return &HTTPPutPersistenceItemDataNotFound{}
 }
 
-/*HTTPPutPersistenceItemDataNotFound handles this case with default header values.
+/*
+HTTPPutPersistenceItemDataNotFound handles this case with default header values.
 
 Unknown Item or persistence service
 */

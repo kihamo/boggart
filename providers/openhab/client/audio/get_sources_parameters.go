@@ -56,7 +56,8 @@ func NewGetSourcesParamsWithHTTPClient(client *http.Client) *GetSourcesParams {
 	}
 }
 
-/*GetSourcesParams contains all the parameters to send to the API endpoint
+/*
+GetSourcesParams contains all the parameters to send to the API endpoint
 for the get sources operation typically these are written to a http.Request
 */
 type GetSourcesParams struct {

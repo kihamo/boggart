@@ -51,7 +51,8 @@ func NewHTTPDeletePersistenceServiceItemOK() *HTTPDeletePersistenceServiceItemOK
 	return &HTTPDeletePersistenceServiceItemOK{}
 }
 
-/*HTTPDeletePersistenceServiceItemOK handles this case with default header values.
+/*
+HTTPDeletePersistenceServiceItemOK handles this case with default header values.
 
 OK
 */
@@ -82,7 +83,8 @@ func NewHTTPDeletePersistenceServiceItemBadRequest() *HTTPDeletePersistenceServi
 	return &HTTPDeletePersistenceServiceItemBadRequest{}
 }
 
-/*HTTPDeletePersistenceServiceItemBadRequest handles this case with default header values.
+/*
+HTTPDeletePersistenceServiceItemBadRequest handles this case with default header values.
 
 Invalid filter parameters
 */
@@ -103,7 +105,8 @@ func NewHTTPDeletePersistenceServiceItemNotFound() *HTTPDeletePersistenceService
 	return &HTTPDeletePersistenceServiceItemNotFound{}
 }
 
-/*HTTPDeletePersistenceServiceItemNotFound handles this case with default header values.
+/*
+HTTPDeletePersistenceServiceItemNotFound handles this case with default header values.
 
 Unknown persistence service
 */

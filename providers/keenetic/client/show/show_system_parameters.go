@@ -52,10 +52,12 @@ func NewShowSystemParamsWithHTTPClient(client *http.Client) *ShowSystemParams {
 	}
 }
 
-/* ShowSystemParams contains all the parameters to send to the API endpoint
-   for the show system operation.
+/*
+ShowSystemParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the show system operation.
+
+	Typically these are written to a http.Request.
 */
 type ShowSystemParams struct {
 	timeout    time.Duration

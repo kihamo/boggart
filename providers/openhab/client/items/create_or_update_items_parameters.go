@@ -58,7 +58,8 @@ func NewCreateOrUpdateItemsParamsWithHTTPClient(client *http.Client) *CreateOrUp
 	}
 }
 
-/*CreateOrUpdateItemsParams contains all the parameters to send to the API endpoint
+/*
+CreateOrUpdateItemsParams contains all the parameters to send to the API endpoint
 for the create or update items operation typically these are written to a http.Request
 */
 type CreateOrUpdateItemsParams struct {

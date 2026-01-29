@@ -44,7 +44,8 @@ func NewGetBillServicesFullOK() *GetBillServicesFullOK {
 	return &GetBillServicesFullOK{}
 }
 
-/*GetBillServicesFullOK handles this case with default header values.
+/*
+GetBillServicesFullOK handles this case with default header values.
 
 Successful operation
 */
@@ -72,7 +73,8 @@ func (o *GetBillServicesFullOK) readResponse(response runtime.ClientResponse, co
 	return nil
 }
 
-/*GetBillServicesFullOKBody get bill services full o k body
+/*
+GetBillServicesFullOKBody get bill services full o k body
 swagger:model GetBillServicesFullOKBody
 */
 type GetBillServicesFullOKBody struct {

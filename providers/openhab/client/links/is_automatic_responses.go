@@ -39,7 +39,8 @@ func NewIsAutomaticOK() *IsAutomaticOK {
 	return &IsAutomaticOK{}
 }
 
-/*IsAutomaticOK handles this case with default header values.
+/*
+IsAutomaticOK handles this case with default header values.
 
 OK
 */

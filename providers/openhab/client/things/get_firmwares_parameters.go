@@ -56,7 +56,8 @@ func NewGetFirmwaresParamsWithHTTPClient(client *http.Client) *GetFirmwaresParam
 	}
 }
 
-/*GetFirmwaresParams contains all the parameters to send to the API endpoint
+/*
+GetFirmwaresParams contains all the parameters to send to the API endpoint
 for the get firmwares operation typically these are written to a http.Request
 */
 type GetFirmwaresParams struct {

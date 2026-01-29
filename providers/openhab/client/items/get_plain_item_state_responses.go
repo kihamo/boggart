@@ -45,7 +45,8 @@ func NewGetPlainItemStateOK() *GetPlainItemStateOK {
 	return &GetPlainItemStateOK{}
 }
 
-/*GetPlainItemStateOK handles this case with default header values.
+/*
+GetPlainItemStateOK handles this case with default header values.
 
 OK
 */
@@ -76,7 +77,8 @@ func NewGetPlainItemStateNotFound() *GetPlainItemStateNotFound {
 	return &GetPlainItemStateNotFound{}
 }
 
-/*GetPlainItemStateNotFound handles this case with default header values.
+/*
+GetPlainItemStateNotFound handles this case with default header values.
 
 Item not found
 */

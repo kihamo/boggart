@@ -39,7 +39,8 @@ func NewGetExtensionsOK() *GetExtensionsOK {
 	return &GetExtensionsOK{}
 }
 
-/*GetExtensionsOK handles this case with default header values.
+/*
+GetExtensionsOK handles this case with default header values.
 
 OK
 */

@@ -56,7 +56,8 @@ func NewGetDefaultSinkParamsWithHTTPClient(client *http.Client) *GetDefaultSinkP
 	}
 }
 
-/*GetDefaultSinkParams contains all the parameters to send to the API endpoint
+/*
+GetDefaultSinkParams contains all the parameters to send to the API endpoint
 for the get default sink operation typically these are written to a http.Request
 */
 type GetDefaultSinkParams struct {

@@ -56,7 +56,8 @@ func NewUninstallExtensionParamsWithHTTPClient(client *http.Client) *UninstallEx
 	}
 }
 
-/*UninstallExtensionParams contains all the parameters to send to the API endpoint
+/*
+UninstallExtensionParams contains all the parameters to send to the API endpoint
 for the uninstall extension operation typically these are written to a http.Request
 */
 type UninstallExtensionParams struct {

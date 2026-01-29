@@ -46,7 +46,8 @@ func NewGetMonitoringTrafficStatisticsOK() *GetMonitoringTrafficStatisticsOK {
 	return &GetMonitoringTrafficStatisticsOK{}
 }
 
-/* GetMonitoringTrafficStatisticsOK describes a response with status code 200, with default header values.
+/*
+	GetMonitoringTrafficStatisticsOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -80,7 +81,8 @@ func NewGetMonitoringTrafficStatisticsDefault(code int) *GetMonitoringTrafficSta
 	}
 }
 
-/* GetMonitoringTrafficStatisticsDefault describes a response with status code -1, with default header values.
+/*
+	GetMonitoringTrafficStatisticsDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */

@@ -50,7 +50,8 @@ func NewRemoveMemberOK() *RemoveMemberOK {
 	return &RemoveMemberOK{}
 }
 
-/*RemoveMemberOK handles this case with default header values.
+/*
+RemoveMemberOK handles this case with default header values.
 
 OK
 */
@@ -71,7 +72,8 @@ func NewRemoveMemberNotFound() *RemoveMemberNotFound {
 	return &RemoveMemberNotFound{}
 }
 
-/*RemoveMemberNotFound handles this case with default header values.
+/*
+RemoveMemberNotFound handles this case with default header values.
 
 Item or member item not found or item is not of type group item.
 */
@@ -92,7 +94,8 @@ func NewRemoveMemberMethodNotAllowed() *RemoveMemberMethodNotAllowed {
 	return &RemoveMemberMethodNotAllowed{}
 }
 
-/*RemoveMemberMethodNotAllowed handles this case with default header values.
+/*
+RemoveMemberMethodNotAllowed handles this case with default header values.
 
 Member item is not editable.
 */

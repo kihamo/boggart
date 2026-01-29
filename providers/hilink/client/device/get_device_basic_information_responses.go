@@ -46,7 +46,8 @@ func NewGetDeviceBasicInformationOK() *GetDeviceBasicInformationOK {
 	return &GetDeviceBasicInformationOK{}
 }
 
-/* GetDeviceBasicInformationOK describes a response with status code 200, with default header values.
+/*
+	GetDeviceBasicInformationOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -80,7 +81,8 @@ func NewGetDeviceBasicInformationDefault(code int) *GetDeviceBasicInformationDef
 	}
 }
 
-/* GetDeviceBasicInformationDefault describes a response with status code -1, with default header values.
+/*
+	GetDeviceBasicInformationDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */

@@ -47,7 +47,8 @@ func NewGetByLatLngOK() *GetByLatLngOK {
 	return &GetByLatLngOK{}
 }
 
-/*GetByLatLngOK handles this case with default header values.
+/*
+GetByLatLngOK handles this case with default header values.
 
 Successful operation
 */
@@ -82,7 +83,8 @@ func NewGetByLatLngDefault(code int) *GetByLatLngDefault {
 	}
 }
 
-/*GetByLatLngDefault handles this case with default header values.
+/*
+GetByLatLngDefault handles this case with default header values.
 
 Unexpected error
 */

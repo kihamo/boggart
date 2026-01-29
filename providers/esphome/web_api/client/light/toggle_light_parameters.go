@@ -56,7 +56,8 @@ func NewToggleLightParamsWithHTTPClient(client *http.Client) *ToggleLightParams 
 	}
 }
 
-/*ToggleLightParams contains all the parameters to send to the API endpoint
+/*
+ToggleLightParams contains all the parameters to send to the API endpoint
 for the toggle light operation typically these are written to a http.Request
 */
 type ToggleLightParams struct {

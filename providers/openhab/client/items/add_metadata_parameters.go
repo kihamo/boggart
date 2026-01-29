@@ -58,7 +58,8 @@ func NewAddMetadataParamsWithHTTPClient(client *http.Client) *AddMetadataParams 
 	}
 }
 
-/*AddMetadataParams contains all the parameters to send to the API endpoint
+/*
+AddMetadataParams contains all the parameters to send to the API endpoint
 for the add metadata operation typically these are written to a http.Request
 */
 type AddMetadataParams struct {

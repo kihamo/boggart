@@ -56,7 +56,8 @@ func NewGetSinksParamsWithHTTPClient(client *http.Client) *GetSinksParams {
 	}
 }
 
-/*GetSinksParams contains all the parameters to send to the API endpoint
+/*
+GetSinksParams contains all the parameters to send to the API endpoint
 for the get sinks operation typically these are written to a http.Request
 */
 type GetSinksParams struct {

@@ -58,7 +58,8 @@ func NewGetStorageInfoParamsWithHTTPClient(client *http.Client) *GetStorageInfoP
 	}
 }
 
-/*GetStorageInfoParams contains all the parameters to send to the API endpoint
+/*
+GetStorageInfoParams contains all the parameters to send to the API endpoint
 for the get storage info operation typically these are written to a http.Request
 */
 type GetStorageInfoParams struct {

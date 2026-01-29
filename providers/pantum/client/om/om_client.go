@@ -33,7 +33,7 @@ type ClientService interface {
 }
 
 /*
-  GetDatabase gets product info
+GetDatabase gets product info
 */
 func (a *Client) GetDatabase(params *GetDatabaseParams) (*GetDatabaseOK, error) {
 	// TODO: Validate the params before sending

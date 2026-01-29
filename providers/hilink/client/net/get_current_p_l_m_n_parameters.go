@@ -52,10 +52,12 @@ func NewGetCurrentPLMNParamsWithHTTPClient(client *http.Client) *GetCurrentPLMNP
 	}
 }
 
-/* GetCurrentPLMNParams contains all the parameters to send to the API endpoint
-   for the get current p l m n operation.
+/*
+GetCurrentPLMNParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get current p l m n operation.
+
+	Typically these are written to a http.Request.
 */
 type GetCurrentPLMNParams struct {
 	timeout    time.Duration

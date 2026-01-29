@@ -56,7 +56,8 @@ func NewGetVoicesParamsWithHTTPClient(client *http.Client) *GetVoicesParams {
 	}
 }
 
-/*GetVoicesParams contains all the parameters to send to the API endpoint
+/*
+GetVoicesParams contains all the parameters to send to the API endpoint
 for the get voices operation typically these are written to a http.Request
 */
 type GetVoicesParams struct {

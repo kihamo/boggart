@@ -50,7 +50,8 @@ func NewLinkOK() *LinkOK {
 	return &LinkOK{}
 }
 
-/*LinkOK handles this case with default header values.
+/*
+LinkOK handles this case with default header values.
 
 OK
 */
@@ -71,7 +72,8 @@ func NewLinkBadRequest() *LinkBadRequest {
 	return &LinkBadRequest{}
 }
 
-/*LinkBadRequest handles this case with default header values.
+/*
+LinkBadRequest handles this case with default header values.
 
 Content does not match the path
 */
@@ -92,7 +94,8 @@ func NewLinkMethodNotAllowed() *LinkMethodNotAllowed {
 	return &LinkMethodNotAllowed{}
 }
 
-/*LinkMethodNotAllowed handles this case with default header values.
+/*
+LinkMethodNotAllowed handles this case with default header values.
 
 Link is not editable
 */

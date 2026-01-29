@@ -50,7 +50,8 @@ func NewInterpretOK() *InterpretOK {
 	return &InterpretOK{}
 }
 
-/*InterpretOK handles this case with default header values.
+/*
+InterpretOK handles this case with default header values.
 
 OK
 */
@@ -71,7 +72,8 @@ func NewInterpretBadRequest() *InterpretBadRequest {
 	return &InterpretBadRequest{}
 }
 
-/*InterpretBadRequest handles this case with default header values.
+/*
+InterpretBadRequest handles this case with default header values.
 
 interpretation exception occurs
 */
@@ -92,7 +94,8 @@ func NewInterpretNotFound() *InterpretNotFound {
 	return &InterpretNotFound{}
 }
 
-/*InterpretNotFound handles this case with default header values.
+/*
+InterpretNotFound handles this case with default header values.
 
 No human language interpreter was found.
 */

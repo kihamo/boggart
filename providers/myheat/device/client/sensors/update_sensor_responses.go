@@ -39,7 +39,8 @@ func NewUpdateSensorOK() *UpdateSensorOK {
 	return &UpdateSensorOK{}
 }
 
-/* UpdateSensorOK describes a response with status code 200, with default header values.
+/*
+	UpdateSensorOK describes a response with status code 200, with default header values.
 
 Successful login
 */

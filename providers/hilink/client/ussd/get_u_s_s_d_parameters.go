@@ -52,10 +52,12 @@ func NewGetUSSDParamsWithHTTPClient(client *http.Client) *GetUSSDParams {
 	}
 }
 
-/* GetUSSDParams contains all the parameters to send to the API endpoint
-   for the get u s s d operation.
+/*
+GetUSSDParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get u s s d operation.
+
+	Typically these are written to a http.Request.
 */
 type GetUSSDParams struct {
 	timeout    time.Duration

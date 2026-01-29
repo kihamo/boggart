@@ -44,7 +44,8 @@ func NewGetDefaultVoiceOK() *GetDefaultVoiceOK {
 	return &GetDefaultVoiceOK{}
 }
 
-/*GetDefaultVoiceOK handles this case with default header values.
+/*
+GetDefaultVoiceOK handles this case with default header values.
 
 OK
 */
@@ -65,7 +66,8 @@ func NewGetDefaultVoiceNotFound() *GetDefaultVoiceNotFound {
 	return &GetDefaultVoiceNotFound{}
 }
 
-/*GetDefaultVoiceNotFound handles this case with default header values.
+/*
+GetDefaultVoiceNotFound handles this case with default header values.
 
 No default voice was found.
 */

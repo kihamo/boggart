@@ -44,7 +44,8 @@ func NewGetFirmwaresOK() *GetFirmwaresOK {
 	return &GetFirmwaresOK{}
 }
 
-/*GetFirmwaresOK handles this case with default header values.
+/*
+GetFirmwaresOK handles this case with default header values.
 
 OK
 */
@@ -65,7 +66,8 @@ func NewGetFirmwaresNoContent() *GetFirmwaresNoContent {
 	return &GetFirmwaresNoContent{}
 }
 
-/*GetFirmwaresNoContent handles this case with default header values.
+/*
+GetFirmwaresNoContent handles this case with default header values.
 
 No firmwares found.
 */

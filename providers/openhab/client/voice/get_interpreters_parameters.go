@@ -56,7 +56,8 @@ func NewGetInterpretersParamsWithHTTPClient(client *http.Client) *GetInterpreter
 	}
 }
 
-/*GetInterpretersParams contains all the parameters to send to the API endpoint
+/*
+GetInterpretersParams contains all the parameters to send to the API endpoint
 for the get interpreters operation typically these are written to a http.Request
 */
 type GetInterpretersParams struct {

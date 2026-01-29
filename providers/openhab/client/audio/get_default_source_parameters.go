@@ -56,7 +56,8 @@ func NewGetDefaultSourceParamsWithHTTPClient(client *http.Client) *GetDefaultSou
 	}
 }
 
-/*GetDefaultSourceParams contains all the parameters to send to the API endpoint
+/*
+GetDefaultSourceParams contains all the parameters to send to the API endpoint
 for the get default source operation typically these are written to a http.Request
 */
 type GetDefaultSourceParams struct {

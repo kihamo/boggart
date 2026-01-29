@@ -51,7 +51,8 @@ func NewDeviceControlOK() *DeviceControlOK {
 	return &DeviceControlOK{}
 }
 
-/* DeviceControlOK describes a response with status code 200, with default header values.
+/*
+	DeviceControlOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -83,7 +84,8 @@ func NewDeviceControlDefault(code int) *DeviceControlDefault {
 	}
 }
 
-/* DeviceControlDefault describes a response with status code -1, with default header values.
+/*
+	DeviceControlDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -117,7 +119,8 @@ func (o *DeviceControlDefault) readResponse(response runtime.ClientResponse, con
 	return nil
 }
 
-/*DeviceControlBody device control body
+/*
+DeviceControlBody device control body
 swagger:model DeviceControlBody
 */
 type DeviceControlBody struct {

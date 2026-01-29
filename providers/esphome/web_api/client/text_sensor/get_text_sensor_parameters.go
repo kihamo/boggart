@@ -56,7 +56,8 @@ func NewGetTextSensorParamsWithHTTPClient(client *http.Client) *GetTextSensorPar
 	}
 }
 
-/*GetTextSensorParams contains all the parameters to send to the API endpoint
+/*
+GetTextSensorParams contains all the parameters to send to the API endpoint
 for the get text sensor operation typically these are written to a http.Request
 */
 type GetTextSensorParams struct {

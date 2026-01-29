@@ -40,7 +40,8 @@ func NewGetDatabaseOK() *GetDatabaseOK {
 	return &GetDatabaseOK{}
 }
 
-/*GetDatabaseOK handles this case with default header values.
+/*
+GetDatabaseOK handles this case with default header values.
 
 Successful login
 */

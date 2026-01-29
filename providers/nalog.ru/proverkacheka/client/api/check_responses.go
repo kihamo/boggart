@@ -38,7 +38,8 @@ func NewCheckNoContent() *CheckNoContent {
 	return &CheckNoContent{}
 }
 
-/*CheckNoContent handles this case with default header values.
+/*
+CheckNoContent handles this case with default header values.
 
 Successful operation
 */

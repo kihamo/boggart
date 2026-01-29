@@ -44,7 +44,8 @@ func NewGetDebtOK() *GetDebtOK {
 	return &GetDebtOK{}
 }
 
-/*GetDebtOK handles this case with default header values.
+/*
+GetDebtOK handles this case with default header values.
 
 Successful operation
 */
@@ -72,7 +73,8 @@ func (o *GetDebtOK) readResponse(response runtime.ClientResponse, consumer runti
 	return nil
 }
 
-/*GetDebtOKBody get debt o k body
+/*
+GetDebtOKBody get debt o k body
 swagger:model GetDebtOKBody
 */
 type GetDebtOKBody struct {

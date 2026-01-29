@@ -49,7 +49,8 @@ func NewGetBasicConfigOK() *GetBasicConfigOK {
 	return &GetBasicConfigOK{}
 }
 
-/*GetBasicConfigOK handles this case with default header values.
+/*
+GetBasicConfigOK handles this case with default header values.
 
 Successful operation
 */
@@ -84,7 +85,8 @@ func NewGetBasicConfigDefault(code int) *GetBasicConfigDefault {
 	}
 }
 
-/*GetBasicConfigDefault handles this case with default header values.
+/*
+GetBasicConfigDefault handles this case with default header values.
 
 Unexpected error
 */
@@ -119,7 +121,8 @@ func (o *GetBasicConfigDefault) readResponse(response runtime.ClientResponse, co
 	return nil
 }
 
-/*GetBasicConfigOKBody get basic config o k body
+/*
+GetBasicConfigOKBody get basic config o k body
 swagger:model GetBasicConfigOKBody
 */
 type GetBasicConfigOKBody struct {

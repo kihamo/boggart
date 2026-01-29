@@ -60,7 +60,8 @@ func NewGenerateOK(writer io.Writer) *GenerateOK {
 	}
 }
 
-/*GenerateOK handles this case with default header values.
+/*
+GenerateOK handles this case with default header values.
 
 Successful operation
 */
@@ -91,7 +92,8 @@ func NewGenerateBadRequest() *GenerateBadRequest {
 	return &GenerateBadRequest{}
 }
 
-/*GenerateBadRequest handles this case with default header values.
+/*
+GenerateBadRequest handles this case with default header values.
 
 Bad request
 */
@@ -122,7 +124,8 @@ func NewGenerateLocked() *GenerateLocked {
 	return &GenerateLocked{}
 }
 
-/*GenerateLocked handles this case with default header values.
+/*
+GenerateLocked handles this case with default header values.
 
 API key is locked, please contact Yandex support team
 */
@@ -155,7 +158,8 @@ func NewGenerateDefault(code int) *GenerateDefault {
 	}
 }
 
-/*GenerateDefault handles this case with default header values.
+/*
+GenerateDefault handles this case with default header values.
 
 Unexpected error
 */

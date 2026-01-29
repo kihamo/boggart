@@ -44,7 +44,8 @@ func NewGetDefaultSourceOK() *GetDefaultSourceOK {
 	return &GetDefaultSourceOK{}
 }
 
-/*GetDefaultSourceOK handles this case with default header values.
+/*
+GetDefaultSourceOK handles this case with default header values.
 
 OK
 */
@@ -65,7 +66,8 @@ func NewGetDefaultSourceNotFound() *GetDefaultSourceNotFound {
 	return &GetDefaultSourceNotFound{}
 }
 
-/*GetDefaultSourceNotFound handles this case with default header values.
+/*
+GetDefaultSourceNotFound handles this case with default header values.
 
 Source not found
 */

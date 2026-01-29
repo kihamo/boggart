@@ -54,10 +54,12 @@ func NewSendSMSParamsWithHTTPClient(client *http.Client) *SendSMSParams {
 	}
 }
 
-/* SendSMSParams contains all the parameters to send to the API endpoint
-   for the send s m s operation.
+/*
+SendSMSParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the send s m s operation.
+
+	Typically these are written to a http.Request.
 */
 type SendSMSParams struct {
 

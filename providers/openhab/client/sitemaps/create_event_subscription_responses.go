@@ -51,7 +51,8 @@ func NewCreateEventSubscriptionOK() *CreateEventSubscriptionOK {
 	return &CreateEventSubscriptionOK{}
 }
 
-/*CreateEventSubscriptionOK handles this case with default header values.
+/*
+CreateEventSubscriptionOK handles this case with default header values.
 
 successful operation
 */
@@ -82,7 +83,8 @@ func NewCreateEventSubscriptionCreated() *CreateEventSubscriptionCreated {
 	return &CreateEventSubscriptionCreated{}
 }
 
-/*CreateEventSubscriptionCreated handles this case with default header values.
+/*
+CreateEventSubscriptionCreated handles this case with default header values.
 
 Subscription created.
 */
@@ -103,7 +105,8 @@ func NewCreateEventSubscriptionServiceUnavailable() *CreateEventSubscriptionServ
 	return &CreateEventSubscriptionServiceUnavailable{}
 }
 
-/*CreateEventSubscriptionServiceUnavailable handles this case with default header values.
+/*
+CreateEventSubscriptionServiceUnavailable handles this case with default header values.
 
 Subscriptions limit reached.
 */

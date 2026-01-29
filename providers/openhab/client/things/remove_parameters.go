@@ -69,7 +69,8 @@ func NewRemoveParamsWithHTTPClient(client *http.Client) *RemoveParams {
 	}
 }
 
-/*RemoveParams contains all the parameters to send to the API endpoint
+/*
+RemoveParams contains all the parameters to send to the API endpoint
 for the remove operation typically these are written to a http.Request
 */
 type RemoveParams struct {

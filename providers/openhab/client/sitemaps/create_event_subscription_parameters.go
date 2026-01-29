@@ -56,7 +56,8 @@ func NewCreateEventSubscriptionParamsWithHTTPClient(client *http.Client) *Create
 	}
 }
 
-/*CreateEventSubscriptionParams contains all the parameters to send to the API endpoint
+/*
+CreateEventSubscriptionParams contains all the parameters to send to the API endpoint
 for the create event subscription operation typically these are written to a http.Request
 */
 type CreateEventSubscriptionParams struct {

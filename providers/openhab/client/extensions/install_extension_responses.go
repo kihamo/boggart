@@ -38,7 +38,8 @@ func NewInstallExtensionOK() *InstallExtensionOK {
 	return &InstallExtensionOK{}
 }
 
-/*InstallExtensionOK handles this case with default header values.
+/*
+InstallExtensionOK handles this case with default header values.
 
 OK
 */

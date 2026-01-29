@@ -57,7 +57,8 @@ func NewGetPageDataParamsWithHTTPClient(client *http.Client) *GetPageDataParams 
 	}
 }
 
-/*GetPageDataParams contains all the parameters to send to the API endpoint
+/*
+GetPageDataParams contains all the parameters to send to the API endpoint
 for the get page data operation typically these are written to a http.Request
 */
 type GetPageDataParams struct {

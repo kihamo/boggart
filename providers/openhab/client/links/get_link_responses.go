@@ -44,7 +44,8 @@ func NewGetLinkOK() *GetLinkOK {
 	return &GetLinkOK{}
 }
 
-/*GetLinkOK handles this case with default header values.
+/*
+GetLinkOK handles this case with default header values.
 
 OK
 */
@@ -65,7 +66,8 @@ func NewGetLinkNotFound() *GetLinkNotFound {
 	return &GetLinkNotFound{}
 }
 
-/*GetLinkNotFound handles this case with default header values.
+/*
+GetLinkNotFound handles this case with default header values.
 
 Content does not match the path
 */

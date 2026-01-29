@@ -52,10 +52,12 @@ func NewReadSMSParamsWithHTTPClient(client *http.Client) *ReadSMSParams {
 	}
 }
 
-/* ReadSMSParams contains all the parameters to send to the API endpoint
-   for the read s m s operation.
+/*
+ReadSMSParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the read s m s operation.
+
+	Typically these are written to a http.Request.
 */
 type ReadSMSParams struct {
 

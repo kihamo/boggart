@@ -52,10 +52,12 @@ func NewGetSMSCountParamsWithHTTPClient(client *http.Client) *GetSMSCountParams 
 	}
 }
 
-/* GetSMSCountParams contains all the parameters to send to the API endpoint
-   for the get s m s count operation.
+/*
+GetSMSCountParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get s m s count operation.
+
+	Typically these are written to a http.Request.
 */
 type GetSMSCountParams struct {
 	timeout    time.Duration

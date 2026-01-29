@@ -56,7 +56,8 @@ func NewGetRootParamsWithHTTPClient(client *http.Client) *GetRootParams {
 	}
 }
 
-/*GetRootParams contains all the parameters to send to the API endpoint
+/*
+GetRootParams contains all the parameters to send to the API endpoint
 for the get root operation typically these are written to a http.Request
 */
 type GetRootParams struct {

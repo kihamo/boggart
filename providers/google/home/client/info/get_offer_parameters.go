@@ -56,7 +56,8 @@ func NewGetOfferParamsWithHTTPClient(client *http.Client) *GetOfferParams {
 	}
 }
 
-/*GetOfferParams contains all the parameters to send to the API endpoint
+/*
+GetOfferParams contains all the parameters to send to the API endpoint
 for the get offer operation typically these are written to a http.Request
 */
 type GetOfferParams struct {

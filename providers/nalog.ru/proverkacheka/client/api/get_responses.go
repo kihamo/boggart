@@ -43,7 +43,8 @@ func NewGetOK() *GetOK {
 	return &GetOK{}
 }
 
-/*GetOK handles this case with default header values.
+/*
+GetOK handles this case with default header values.
 
 Successful operation
 */
@@ -71,7 +72,8 @@ func (o *GetOK) readResponse(response runtime.ClientResponse, consumer runtime.C
 	return nil
 }
 
-/*GetOKBody get o k body
+/*
+GetOKBody get o k body
 swagger:model GetOKBody
 */
 type GetOKBody struct {

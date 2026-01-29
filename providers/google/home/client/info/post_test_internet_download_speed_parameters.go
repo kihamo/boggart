@@ -56,7 +56,8 @@ func NewPostTestInternetDownloadSpeedParamsWithHTTPClient(client *http.Client) *
 	}
 }
 
-/*PostTestInternetDownloadSpeedParams contains all the parameters to send to the API endpoint
+/*
+PostTestInternetDownloadSpeedParams contains all the parameters to send to the API endpoint
 for the post test internet download speed operation typically these are written to a http.Request
 */
 type PostTestInternetDownloadSpeedParams struct {

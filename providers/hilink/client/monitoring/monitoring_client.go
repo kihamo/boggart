@@ -36,7 +36,7 @@ type ClientService interface {
 }
 
 /*
-  GetMonitoringStatus get monitoring status API
+GetMonitoringStatus get monitoring status API
 */
 func (a *Client) GetMonitoringStatus(params *GetMonitoringStatusParams, opts ...ClientOption) (*GetMonitoringStatusOK, error) {
 	// TODO: Validate the params before sending
@@ -73,7 +73,7 @@ func (a *Client) GetMonitoringStatus(params *GetMonitoringStatusParams, opts ...
 }
 
 /*
-  GetMonitoringTrafficStatistics get monitoring traffic statistics API
+GetMonitoringTrafficStatistics get monitoring traffic statistics API
 */
 func (a *Client) GetMonitoringTrafficStatistics(params *GetMonitoringTrafficStatisticsParams, opts ...ClientOption) (*GetMonitoringTrafficStatisticsOK, error) {
 	// TODO: Validate the params before sending

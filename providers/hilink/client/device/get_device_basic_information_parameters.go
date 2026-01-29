@@ -52,10 +52,12 @@ func NewGetDeviceBasicInformationParamsWithHTTPClient(client *http.Client) *GetD
 	}
 }
 
-/* GetDeviceBasicInformationParams contains all the parameters to send to the API endpoint
-   for the get device basic information operation.
+/*
+GetDeviceBasicInformationParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get device basic information operation.
+
+	Typically these are written to a http.Request.
 */
 type GetDeviceBasicInformationParams struct {
 	timeout    time.Duration

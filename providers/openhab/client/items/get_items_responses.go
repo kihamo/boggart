@@ -41,7 +41,8 @@ func NewGetItemsOK() *GetItemsOK {
 	return &GetItemsOK{}
 }
 
-/*GetItemsOK handles this case with default header values.
+/*
+GetItemsOK handles this case with default header values.
 
 OK
 */

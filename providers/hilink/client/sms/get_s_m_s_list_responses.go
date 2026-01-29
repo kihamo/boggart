@@ -46,7 +46,8 @@ func NewGetSMSListOK() *GetSMSListOK {
 	return &GetSMSListOK{}
 }
 
-/* GetSMSListOK describes a response with status code 200, with default header values.
+/*
+	GetSMSListOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -80,7 +81,8 @@ func NewGetSMSListDefault(code int) *GetSMSListDefault {
 	}
 }
 
-/* GetSMSListDefault describes a response with status code -1, with default header values.
+/*
+	GetSMSListDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */

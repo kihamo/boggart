@@ -54,10 +54,12 @@ func NewGetSMSListParamsWithHTTPClient(client *http.Client) *GetSMSListParams {
 	}
 }
 
-/* GetSMSListParams contains all the parameters to send to the API endpoint
-   for the get s m s list operation.
+/*
+GetSMSListParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get s m s list operation.
+
+	Typically these are written to a http.Request.
 */
 type GetSMSListParams struct {
 

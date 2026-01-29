@@ -42,7 +42,7 @@ type ClientService interface {
 }
 
 /*
-  GetSMSCount get s m s count API
+GetSMSCount get s m s count API
 */
 func (a *Client) GetSMSCount(params *GetSMSCountParams, opts ...ClientOption) (*GetSMSCountOK, error) {
 	// TODO: Validate the params before sending
@@ -79,7 +79,7 @@ func (a *Client) GetSMSCount(params *GetSMSCountParams, opts ...ClientOption) (*
 }
 
 /*
-  GetSMSList get s m s list API
+GetSMSList get s m s list API
 */
 func (a *Client) GetSMSList(params *GetSMSListParams, opts ...ClientOption) (*GetSMSListOK, error) {
 	// TODO: Validate the params before sending
@@ -116,7 +116,7 @@ func (a *Client) GetSMSList(params *GetSMSListParams, opts ...ClientOption) (*Ge
 }
 
 /*
-  ReadSMS read s m s API
+ReadSMS read s m s API
 */
 func (a *Client) ReadSMS(params *ReadSMSParams, opts ...ClientOption) (*ReadSMSOK, error) {
 	// TODO: Validate the params before sending
@@ -153,7 +153,7 @@ func (a *Client) ReadSMS(params *ReadSMSParams, opts ...ClientOption) (*ReadSMSO
 }
 
 /*
-  RemoveSMS remove s m s API
+RemoveSMS remove s m s API
 */
 func (a *Client) RemoveSMS(params *RemoveSMSParams, opts ...ClientOption) (*RemoveSMSOK, error) {
 	// TODO: Validate the params before sending
@@ -190,7 +190,7 @@ func (a *Client) RemoveSMS(params *RemoveSMSParams, opts ...ClientOption) (*Remo
 }
 
 /*
-  SendSMS send s m s API
+SendSMS send s m s API
 */
 func (a *Client) SendSMS(params *SendSMSParams, opts ...ClientOption) (*SendSMSOK, error) {
 	// TODO: Validate the params before sending

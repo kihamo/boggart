@@ -41,7 +41,8 @@ func NewGetSupportedLocalesOK() *GetSupportedLocalesOK {
 	return &GetSupportedLocalesOK{}
 }
 
-/*GetSupportedLocalesOK handles this case with default header values.
+/*
+GetSupportedLocalesOK handles this case with default header values.
 
 returned supported locales list
 */

@@ -135,8 +135,8 @@ func (b *Bind) nodesAttributesSubscriber(_ context.Context, _ mqtt.Component, me
 }
 
 /*
-	homie / device ID / node ID / $node-attribute
-	homie / device ID / node ID / property ID
+homie / device ID / node ID / $node-attribute
+homie / device ID / node ID / property ID
 */
 func (b *Bind) nodesSubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 	route := message.Topic().Split()
@@ -171,7 +171,7 @@ func (b *Bind) nodesSubscriber(_ context.Context, _ mqtt.Component, message mqtt
 }
 
 /*
-	homie / device ID / node ID / property ID / $property-attribute
+homie / device ID / node ID / property ID / $property-attribute
 */
 func (b *Bind) nodesPropertySubscriber(_ context.Context, _ mqtt.Component, message mqtt.Message) error {
 	route := message.Topic().Split()

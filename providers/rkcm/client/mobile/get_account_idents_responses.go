@@ -40,7 +40,8 @@ func NewGetAccountIdentsOK() *GetAccountIdentsOK {
 	return &GetAccountIdentsOK{}
 }
 
-/*GetAccountIdentsOK handles this case with default header values.
+/*
+GetAccountIdentsOK handles this case with default header values.
 
 Successful operation
 */
@@ -68,7 +69,8 @@ func (o *GetAccountIdentsOK) readResponse(response runtime.ClientResponse, consu
 	return nil
 }
 
-/*GetAccountIdentsOKBody get account idents o k body
+/*
+GetAccountIdentsOKBody get account idents o k body
 swagger:model GetAccountIdentsOKBody
 */
 type GetAccountIdentsOKBody struct {

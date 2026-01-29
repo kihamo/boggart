@@ -56,7 +56,8 @@ func NewGetByCityParamsWithHTTPClient(client *http.Client) *GetByCityParams {
 	}
 }
 
-/*GetByCityParams contains all the parameters to send to the API endpoint
+/*
+GetByCityParams contains all the parameters to send to the API endpoint
 for the get by city operation typically these are written to a http.Request
 */
 type GetByCityParams struct {

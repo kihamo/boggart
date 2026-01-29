@@ -45,7 +45,8 @@ func NewGetGalleryWidgetsItemOK() *GetGalleryWidgetsItemOK {
 	return &GetGalleryWidgetsItemOK{}
 }
 
-/*GetGalleryWidgetsItemOK handles this case with default header values.
+/*
+GetGalleryWidgetsItemOK handles this case with default header values.
 
 OK
 */
@@ -76,7 +77,8 @@ func NewGetGalleryWidgetsItemNotFound() *GetGalleryWidgetsItemNotFound {
 	return &GetGalleryWidgetsItemNotFound{}
 }
 
-/*GetGalleryWidgetsItemNotFound handles this case with default header values.
+/*
+GetGalleryWidgetsItemNotFound handles this case with default header values.
 
 Unknown gallery or gallery item not found
 */

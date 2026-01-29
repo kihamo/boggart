@@ -56,7 +56,8 @@ func NewHTTPPutPersistenceItemDataParamsWithHTTPClient(client *http.Client) *HTT
 	}
 }
 
-/*HTTPPutPersistenceItemDataParams contains all the parameters to send to the API endpoint
+/*
+HTTPPutPersistenceItemDataParams contains all the parameters to send to the API endpoint
 for the http put persistence item data operation typically these are written to a http.Request
 */
 type HTTPPutPersistenceItemDataParams struct {

@@ -56,7 +56,8 @@ func NewIsAutomaticParamsWithHTTPClient(client *http.Client) *IsAutomaticParams 
 	}
 }
 
-/*IsAutomaticParams contains all the parameters to send to the API endpoint
+/*
+IsAutomaticParams contains all the parameters to send to the API endpoint
 for the is automatic operation typically these are written to a http.Request
 */
 type IsAutomaticParams struct {

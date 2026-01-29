@@ -56,7 +56,8 @@ func NewGetAllParamsWithHTTPClient(client *http.Client) *GetAllParams {
 	}
 }
 
-/*GetAllParams contains all the parameters to send to the API endpoint
+/*
+GetAllParams contains all the parameters to send to the API endpoint
 for the get all operation typically these are written to a http.Request
 */
 type GetAllParams struct {

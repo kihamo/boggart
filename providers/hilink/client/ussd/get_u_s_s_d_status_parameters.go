@@ -52,10 +52,12 @@ func NewGetUSSDStatusParamsWithHTTPClient(client *http.Client) *GetUSSDStatusPar
 	}
 }
 
-/* GetUSSDStatusParams contains all the parameters to send to the API endpoint
-   for the get u s s d status operation.
+/*
+GetUSSDStatusParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get u s s d status operation.
+
+	Typically these are written to a http.Request.
 */
 type GetUSSDStatusParams struct {
 	timeout    time.Duration

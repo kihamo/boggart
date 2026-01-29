@@ -39,7 +39,8 @@ func NewGetSensorsOK() *GetSensorsOK {
 	return &GetSensorsOK{}
 }
 
-/* GetSensorsOK describes a response with status code 200, with default header values.
+/*
+	GetSensorsOK describes a response with status code 200, with default header values.
 
 Successful login
 */

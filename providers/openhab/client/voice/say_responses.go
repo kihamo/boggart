@@ -38,7 +38,8 @@ func NewSayOK() *SayOK {
 	return &SayOK{}
 }
 
-/*SayOK handles this case with default header values.
+/*
+SayOK handles this case with default header values.
 
 OK
 */

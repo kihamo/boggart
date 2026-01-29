@@ -69,7 +69,8 @@ func NewGetItemsParamsWithHTTPClient(client *http.Client) *GetItemsParams {
 	}
 }
 
-/*GetItemsParams contains all the parameters to send to the API endpoint
+/*
+GetItemsParams contains all the parameters to send to the API endpoint
 for the get items operation typically these are written to a http.Request
 */
 type GetItemsParams struct {

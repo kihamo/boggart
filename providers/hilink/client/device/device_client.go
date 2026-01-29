@@ -44,7 +44,7 @@ type ClientService interface {
 }
 
 /*
-  DeviceControl device control API
+DeviceControl device control API
 */
 func (a *Client) DeviceControl(params *DeviceControlParams, opts ...ClientOption) (*DeviceControlOK, error) {
 	// TODO: Validate the params before sending
@@ -81,7 +81,7 @@ func (a *Client) DeviceControl(params *DeviceControlParams, opts ...ClientOption
 }
 
 /*
-  GetCompressLogFile get compress log file API
+GetCompressLogFile get compress log file API
 */
 func (a *Client) GetCompressLogFile(params *GetCompressLogFileParams, opts ...ClientOption) (*GetCompressLogFileOK, error) {
 	// TODO: Validate the params before sending
@@ -118,7 +118,7 @@ func (a *Client) GetCompressLogFile(params *GetCompressLogFileParams, opts ...Cl
 }
 
 /*
-  GetDeviceAutoRunVersion get device auto run version API
+GetDeviceAutoRunVersion get device auto run version API
 */
 func (a *Client) GetDeviceAutoRunVersion(params *GetDeviceAutoRunVersionParams, opts ...ClientOption) (*GetDeviceAutoRunVersionOK, error) {
 	// TODO: Validate the params before sending
@@ -155,7 +155,7 @@ func (a *Client) GetDeviceAutoRunVersion(params *GetDeviceAutoRunVersionParams, 
 }
 
 /*
-  GetDeviceBasicInformation get device basic information API
+GetDeviceBasicInformation get device basic information API
 */
 func (a *Client) GetDeviceBasicInformation(params *GetDeviceBasicInformationParams, opts ...ClientOption) (*GetDeviceBasicInformationOK, error) {
 	// TODO: Validate the params before sending
@@ -192,7 +192,7 @@ func (a *Client) GetDeviceBasicInformation(params *GetDeviceBasicInformationPara
 }
 
 /*
-  GetDeviceInformation get device information API
+GetDeviceInformation get device information API
 */
 func (a *Client) GetDeviceInformation(params *GetDeviceInformationParams, opts ...ClientOption) (*GetDeviceInformationOK, error) {
 	// TODO: Validate the params before sending
@@ -229,7 +229,7 @@ func (a *Client) GetDeviceInformation(params *GetDeviceInformationParams, opts .
 }
 
 /*
-  GetDeviceSignal get device signal API
+GetDeviceSignal get device signal API
 */
 func (a *Client) GetDeviceSignal(params *GetDeviceSignalParams, opts ...ClientOption) (*GetDeviceSignalOK, error) {
 	// TODO: Validate the params before sending

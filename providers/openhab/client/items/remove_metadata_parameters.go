@@ -56,7 +56,8 @@ func NewRemoveMetadataParamsWithHTTPClient(client *http.Client) *RemoveMetadataP
 	}
 }
 
-/*RemoveMetadataParams contains all the parameters to send to the API endpoint
+/*
+RemoveMetadataParams contains all the parameters to send to the API endpoint
 for the remove metadata operation typically these are written to a http.Request
 */
 type RemoveMetadataParams struct {

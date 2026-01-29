@@ -39,7 +39,8 @@ func NewGetStateOK() *GetStateOK {
 	return &GetStateOK{}
 }
 
-/* GetStateOK describes a response with status code 200, with default header values.
+/*
+	GetStateOK describes a response with status code 200, with default header values.
 
 Successful login
 */

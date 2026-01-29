@@ -56,7 +56,8 @@ func NewGetSupportedTimezonesParamsWithHTTPClient(client *http.Client) *GetSuppo
 	}
 }
 
-/*GetSupportedTimezonesParams contains all the parameters to send to the API endpoint
+/*
+GetSupportedTimezonesParams contains all the parameters to send to the API endpoint
 for the get supported timezones operation typically these are written to a http.Request
 */
 type GetSupportedTimezonesParams struct {

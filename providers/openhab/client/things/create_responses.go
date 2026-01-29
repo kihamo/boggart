@@ -51,7 +51,8 @@ func NewCreateCreated() *CreateCreated {
 	return &CreateCreated{}
 }
 
-/*CreateCreated handles this case with default header values.
+/*
+CreateCreated handles this case with default header values.
 
 Created
 */
@@ -82,7 +83,8 @@ func NewCreateBadRequest() *CreateBadRequest {
 	return &CreateBadRequest{}
 }
 
-/*CreateBadRequest handles this case with default header values.
+/*
+CreateBadRequest handles this case with default header values.
 
 A uid must be provided, if no binding can create a thing of this type.
 */
@@ -103,7 +105,8 @@ func NewCreateConflict() *CreateConflict {
 	return &CreateConflict{}
 }
 
-/*CreateConflict handles this case with default header values.
+/*
+CreateConflict handles this case with default header values.
 
 A thing with the same uid already exists.
 */

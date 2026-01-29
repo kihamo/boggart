@@ -52,10 +52,12 @@ func NewRemoveSMSParamsWithHTTPClient(client *http.Client) *RemoveSMSParams {
 	}
 }
 
-/* RemoveSMSParams contains all the parameters to send to the API endpoint
-   for the remove s m s operation.
+/*
+RemoveSMSParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the remove s m s operation.
+
+	Typically these are written to a http.Request.
 */
 type RemoveSMSParams struct {
 

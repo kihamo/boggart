@@ -46,7 +46,8 @@ func NewGetPassByIDOK() *GetPassByIDOK {
 	return &GetPassByIDOK{}
 }
 
-/*GetPassByIDOK handles this case with default header values.
+/*
+GetPassByIDOK handles this case with default header values.
 
 Successful operation
 */
@@ -81,7 +82,8 @@ func NewGetPassByIDDefault(code int) *GetPassByIDDefault {
 	}
 }
 
-/*GetPassByIDDefault handles this case with default header values.
+/*
+GetPassByIDDefault handles this case with default header values.
 
 Unexpected error
 */

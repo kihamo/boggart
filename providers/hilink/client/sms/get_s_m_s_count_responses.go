@@ -46,7 +46,8 @@ func NewGetSMSCountOK() *GetSMSCountOK {
 	return &GetSMSCountOK{}
 }
 
-/* GetSMSCountOK describes a response with status code 200, with default header values.
+/*
+	GetSMSCountOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -80,7 +81,8 @@ func NewGetSMSCountDefault(code int) *GetSMSCountDefault {
 	}
 }
 
-/* GetSMSCountDefault describes a response with status code -1, with default header values.
+/*
+	GetSMSCountDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */

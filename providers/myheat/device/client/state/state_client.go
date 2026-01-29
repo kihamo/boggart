@@ -40,7 +40,7 @@ type ClientService interface {
 }
 
 /*
-  GetObjState gets object state
+GetObjState gets object state
 */
 func (a *Client) GetObjState(params *GetObjStateParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetObjStateOK, error) {
 	// TODO: Validate the params before sending
@@ -79,7 +79,7 @@ func (a *Client) GetObjState(params *GetObjStateParams, authInfo runtime.ClientA
 }
 
 /*
-  GetState gets state about device
+GetState gets state about device
 */
 func (a *Client) GetState(params *GetStateParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GetStateOK, error) {
 	// TODO: Validate the params before sending
@@ -118,7 +118,7 @@ func (a *Client) GetState(params *GetStateParams, authInfo runtime.ClientAuthInf
 }
 
 /*
-  SetObjState sets object state
+SetObjState sets object state
 */
 func (a *Client) SetObjState(params *SetObjStateParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*SetObjStateOK, error) {
 	// TODO: Validate the params before sending

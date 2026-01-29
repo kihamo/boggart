@@ -69,7 +69,8 @@ func NewGetSitemapDataParamsWithHTTPClient(client *http.Client) *GetSitemapDataP
 	}
 }
 
-/*GetSitemapDataParams contains all the parameters to send to the API endpoint
+/*
+GetSitemapDataParams contains all the parameters to send to the API endpoint
 for the get sitemap data operation typically these are written to a http.Request
 */
 type GetSitemapDataParams struct {

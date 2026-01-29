@@ -38,7 +38,8 @@ func NewGetSourcesOK() *GetSourcesOK {
 	return &GetSourcesOK{}
 }
 
-/*GetSourcesOK handles this case with default header values.
+/*
+GetSourcesOK handles this case with default header values.
 
 OK
 */

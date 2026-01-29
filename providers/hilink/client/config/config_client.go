@@ -34,7 +34,7 @@ type ClientService interface {
 }
 
 /*
-  GetGlobalConfig get global config API
+GetGlobalConfig get global config API
 */
 func (a *Client) GetGlobalConfig(params *GetGlobalConfigParams, opts ...ClientOption) (*GetGlobalConfigOK, error) {
 	// TODO: Validate the params before sending

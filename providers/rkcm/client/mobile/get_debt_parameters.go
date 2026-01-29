@@ -56,7 +56,8 @@ func NewGetDebtParamsWithHTTPClient(client *http.Client) *GetDebtParams {
 	}
 }
 
-/*GetDebtParams contains all the parameters to send to the API endpoint
+/*
+GetDebtParams contains all the parameters to send to the API endpoint
 for the get debt operation typically these are written to a http.Request
 */
 type GetDebtParams struct {

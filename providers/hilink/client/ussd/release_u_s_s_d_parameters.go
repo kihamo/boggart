@@ -52,10 +52,12 @@ func NewReleaseUSSDParamsWithHTTPClient(client *http.Client) *ReleaseUSSDParams 
 	}
 }
 
-/* ReleaseUSSDParams contains all the parameters to send to the API endpoint
-   for the release u s s d operation.
+/*
+ReleaseUSSDParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the release u s s d operation.
+
+	Typically these are written to a http.Request.
 */
 type ReleaseUSSDParams struct {
 	timeout    time.Duration

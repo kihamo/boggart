@@ -52,10 +52,12 @@ func NewGetDeviceAutoRunVersionParamsWithHTTPClient(client *http.Client) *GetDev
 	}
 }
 
-/* GetDeviceAutoRunVersionParams contains all the parameters to send to the API endpoint
-   for the get device auto run version operation.
+/*
+GetDeviceAutoRunVersionParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get device auto run version operation.
+
+	Typically these are written to a http.Request.
 */
 type GetDeviceAutoRunVersionParams struct {
 	timeout    time.Duration

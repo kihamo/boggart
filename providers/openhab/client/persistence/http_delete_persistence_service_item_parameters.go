@@ -56,7 +56,8 @@ func NewHTTPDeletePersistenceServiceItemParamsWithHTTPClient(client *http.Client
 	}
 }
 
-/*HTTPDeletePersistenceServiceItemParams contains all the parameters to send to the API endpoint
+/*
+HTTPDeletePersistenceServiceItemParams contains all the parameters to send to the API endpoint
 for the http delete persistence service item operation typically these are written to a http.Request
 */
 type HTTPDeletePersistenceServiceItemParams struct {

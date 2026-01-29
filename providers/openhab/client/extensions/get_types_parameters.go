@@ -56,7 +56,8 @@ func NewGetTypesParamsWithHTTPClient(client *http.Client) *GetTypesParams {
 	}
 }
 
-/*GetTypesParams contains all the parameters to send to the API endpoint
+/*
+GetTypesParams contains all the parameters to send to the API endpoint
 for the get types operation typically these are written to a http.Request
 */
 type GetTypesParams struct {

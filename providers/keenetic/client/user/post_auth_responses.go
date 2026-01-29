@@ -38,7 +38,8 @@ func NewPostAuthOK() *PostAuthOK {
 	return &PostAuthOK{}
 }
 
-/* PostAuthOK describes a response with status code 200, with default header values.
+/*
+	PostAuthOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -54,7 +55,8 @@ func (o *PostAuthOK) readResponse(response runtime.ClientResponse, consumer runt
 	return nil
 }
 
-/*PostAuthBody post auth body
+/*
+PostAuthBody post auth body
 swagger:model PostAuthBody
 */
 type PostAuthBody struct {

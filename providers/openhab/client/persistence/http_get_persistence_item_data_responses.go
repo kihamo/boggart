@@ -47,7 +47,8 @@ func NewHTTPGetPersistenceItemDataOK() *HTTPGetPersistenceItemDataOK {
 	return &HTTPGetPersistenceItemDataOK{}
 }
 
-/*HTTPGetPersistenceItemDataOK handles this case with default header values.
+/*
+HTTPGetPersistenceItemDataOK handles this case with default header values.
 
 OK
 */
@@ -80,7 +81,8 @@ func NewHTTPGetPersistenceItemDataNotFound() *HTTPGetPersistenceItemDataNotFound
 	return &HTTPGetPersistenceItemDataNotFound{}
 }
 
-/*HTTPGetPersistenceItemDataNotFound handles this case with default header values.
+/*
+HTTPGetPersistenceItemDataNotFound handles this case with default header values.
 
 Unknown Item or persistence service
 */

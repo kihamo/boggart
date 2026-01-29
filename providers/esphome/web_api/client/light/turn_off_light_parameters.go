@@ -57,7 +57,8 @@ func NewTurnOffLightParamsWithHTTPClient(client *http.Client) *TurnOffLightParam
 	}
 }
 
-/*TurnOffLightParams contains all the parameters to send to the API endpoint
+/*
+TurnOffLightParams contains all the parameters to send to the API endpoint
 for the turn off light operation typically these are written to a http.Request
 */
 type TurnOffLightParams struct {

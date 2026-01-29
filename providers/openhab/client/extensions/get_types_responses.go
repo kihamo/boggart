@@ -39,7 +39,8 @@ func NewGetTypesOK() *GetTypesOK {
 	return &GetTypesOK{}
 }
 
-/*GetTypesOK handles this case with default header values.
+/*
+GetTypesOK handles this case with default header values.
 
 OK
 */

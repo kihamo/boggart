@@ -56,7 +56,8 @@ func NewGetPlainItemStateParamsWithHTTPClient(client *http.Client) *GetPlainItem
 	}
 }
 
-/*GetPlainItemStateParams contains all the parameters to send to the API endpoint
+/*
+GetPlainItemStateParams contains all the parameters to send to the API endpoint
 for the get plain item state operation typically these are written to a http.Request
 */
 type GetPlainItemStateParams struct {

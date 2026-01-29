@@ -56,7 +56,8 @@ func NewGetConfigStatusParamsWithHTTPClient(client *http.Client) *GetConfigStatu
 	}
 }
 
-/*GetConfigStatusParams contains all the parameters to send to the API endpoint
+/*
+GetConfigStatusParams contains all the parameters to send to the API endpoint
 for the get config status operation typically these are written to a http.Request
 */
 type GetConfigStatusParams struct {

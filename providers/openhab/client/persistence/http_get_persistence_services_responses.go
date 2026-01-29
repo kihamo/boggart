@@ -39,7 +39,8 @@ func NewHTTPGetPersistenceServicesOK() *HTTPGetPersistenceServicesOK {
 	return &HTTPGetPersistenceServicesOK{}
 }
 
-/*HTTPGetPersistenceServicesOK handles this case with default header values.
+/*
+HTTPGetPersistenceServicesOK handles this case with default header values.
 
 OK
 */

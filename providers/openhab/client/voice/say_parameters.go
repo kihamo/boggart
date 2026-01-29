@@ -56,7 +56,8 @@ func NewSayParamsWithHTTPClient(client *http.Client) *SayParams {
 	}
 }
 
-/*SayParams contains all the parameters to send to the API endpoint
+/*
+SayParams contains all the parameters to send to the API endpoint
 for the say operation typically these are written to a http.Request
 */
 type SayParams struct {

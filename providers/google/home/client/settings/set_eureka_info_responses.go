@@ -38,7 +38,8 @@ func NewSetEurekaInfoOK() *SetEurekaInfoOK {
 	return &SetEurekaInfoOK{}
 }
 
-/*SetEurekaInfoOK handles this case with default header values.
+/*
+SetEurekaInfoOK handles this case with default header values.
 
 successful operation
 */

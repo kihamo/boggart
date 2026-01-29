@@ -52,10 +52,12 @@ func NewGetWebServerSessionParamsWithHTTPClient(client *http.Client) *GetWebServ
 	}
 }
 
-/* GetWebServerSessionParams contains all the parameters to send to the API endpoint
-   for the get web server session operation.
+/*
+GetWebServerSessionParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get web server session operation.
+
+	Typically these are written to a http.Request.
 */
 type GetWebServerSessionParams struct {
 	timeout    time.Duration

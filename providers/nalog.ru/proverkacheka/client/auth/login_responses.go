@@ -41,7 +41,8 @@ func NewLoginOK() *LoginOK {
 	return &LoginOK{}
 }
 
-/*LoginOK handles this case with default header values.
+/*
+LoginOK handles this case with default header values.
 
 Successful operation
 */

@@ -50,7 +50,8 @@ func NewAddTagOK() *AddTagOK {
 	return &AddTagOK{}
 }
 
-/*AddTagOK handles this case with default header values.
+/*
+AddTagOK handles this case with default header values.
 
 OK
 */
@@ -71,7 +72,8 @@ func NewAddTagNotFound() *AddTagNotFound {
 	return &AddTagNotFound{}
 }
 
-/*AddTagNotFound handles this case with default header values.
+/*
+AddTagNotFound handles this case with default header values.
 
 Item not found.
 */
@@ -92,7 +94,8 @@ func NewAddTagMethodNotAllowed() *AddTagMethodNotAllowed {
 	return &AddTagMethodNotAllowed{}
 }
 
-/*AddTagMethodNotAllowed handles this case with default header values.
+/*
+AddTagMethodNotAllowed handles this case with default header values.
 
 Item not editable.
 */

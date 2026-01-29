@@ -38,7 +38,8 @@ func NewUninstallExtensionOK() *UninstallExtensionOK {
 	return &UninstallExtensionOK{}
 }
 
-/*UninstallExtensionOK handles this case with default header values.
+/*
+UninstallExtensionOK handles this case with default header values.
 
 OK
 */

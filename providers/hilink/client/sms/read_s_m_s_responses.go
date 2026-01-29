@@ -48,7 +48,8 @@ func NewReadSMSOK() *ReadSMSOK {
 	return &ReadSMSOK{}
 }
 
-/* ReadSMSOK describes a response with status code 200, with default header values.
+/*
+	ReadSMSOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -80,7 +81,8 @@ func NewReadSMSDefault(code int) *ReadSMSDefault {
 	}
 }
 
-/* ReadSMSDefault describes a response with status code -1, with default header values.
+/*
+	ReadSMSDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -114,7 +116,8 @@ func (o *ReadSMSDefault) readResponse(response runtime.ClientResponse, consumer 
 	return nil
 }
 
-/*ReadSMSBody read s m s body
+/*
+ReadSMSBody read s m s body
 swagger:model ReadSMSBody
 */
 type ReadSMSBody struct {

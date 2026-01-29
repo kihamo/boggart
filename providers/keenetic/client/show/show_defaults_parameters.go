@@ -52,10 +52,12 @@ func NewShowDefaultsParamsWithHTTPClient(client *http.Client) *ShowDefaultsParam
 	}
 }
 
-/* ShowDefaultsParams contains all the parameters to send to the API endpoint
-   for the show defaults operation.
+/*
+ShowDefaultsParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the show defaults operation.
+
+	Typically these are written to a http.Request.
 */
 type ShowDefaultsParams struct {
 	timeout    time.Duration

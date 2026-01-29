@@ -47,7 +47,8 @@ func NewGetItemDataOK() *GetItemDataOK {
 	return &GetItemDataOK{}
 }
 
-/*GetItemDataOK handles this case with default header values.
+/*
+GetItemDataOK handles this case with default header values.
 
 OK
 */
@@ -80,7 +81,8 @@ func NewGetItemDataNotFound() *GetItemDataNotFound {
 	return &GetItemDataNotFound{}
 }
 
-/*GetItemDataNotFound handles this case with default header values.
+/*
+GetItemDataNotFound handles this case with default header values.
 
 Item not found
 */

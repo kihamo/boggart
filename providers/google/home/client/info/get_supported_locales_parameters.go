@@ -56,7 +56,8 @@ func NewGetSupportedLocalesParamsWithHTTPClient(client *http.Client) *GetSupport
 	}
 }
 
-/*GetSupportedLocalesParams contains all the parameters to send to the API endpoint
+/*
+GetSupportedLocalesParams contains all the parameters to send to the API endpoint
 for the get supported locales operation typically these are written to a http.Request
 */
 type GetSupportedLocalesParams struct {

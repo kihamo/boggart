@@ -52,10 +52,12 @@ func NewShowIPHotspotParamsWithHTTPClient(client *http.Client) *ShowIPHotspotPar
 	}
 }
 
-/* ShowIPHotspotParams contains all the parameters to send to the API endpoint
-   for the show IP hotspot operation.
+/*
+ShowIPHotspotParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the show IP hotspot operation.
+
+	Typically these are written to a http.Request.
 */
 type ShowIPHotspotParams struct {
 

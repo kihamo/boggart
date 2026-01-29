@@ -47,7 +47,8 @@ func NewGetByUIDOK() *GetByUIDOK {
 	return &GetByUIDOK{}
 }
 
-/*GetByUIDOK handles this case with default header values.
+/*
+GetByUIDOK handles this case with default header values.
 
 OK
 */
@@ -80,7 +81,8 @@ func NewGetByUIDNotFound() *GetByUIDNotFound {
 	return &GetByUIDNotFound{}
 }
 
-/*GetByUIDNotFound handles this case with default header values.
+/*
+GetByUIDNotFound handles this case with default header values.
 
 Thing not found.
 */

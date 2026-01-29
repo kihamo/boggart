@@ -34,7 +34,7 @@ type ClientService interface {
 }
 
 /*
-  GetCurrentPLMN get current p l m n API
+GetCurrentPLMN get current p l m n API
 */
 func (a *Client) GetCurrentPLMN(params *GetCurrentPLMNParams, opts ...ClientOption) (*GetCurrentPLMNOK, error) {
 	// TODO: Validate the params before sending

@@ -25,9 +25,9 @@ func NewRMMini(mac net.HardwareAddr, addr string) *RMMini {
 }
 
 /*
-	Offset    Contents
-	0x00      0x03
-	0x01-0x0f 0x00
+Offset    Contents
+0x00      0x03
+0x01-0x0f 0x00
 */
 func (d *RMMini) StartCaptureRemoteControlCode() error {
 	payload := make([]byte, 0x10)
@@ -47,9 +47,9 @@ func (d *RMMini) StartCaptureRemoteControlCode() error {
 }
 
 /*
-	Offset    Contents
-	0x00      0x04
-	0x01-0x0f 0x00
+Offset    Contents
+0x00      0x04
+0x01-0x0f 0x00
 */
 func (d *RMMini) ReadCapturedRemoteControlCodeRaw() ([]byte, error) {
 	payload := make([]byte, 0x10)

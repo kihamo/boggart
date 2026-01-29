@@ -44,7 +44,8 @@ func NewGetFirmwareStatusOK() *GetFirmwareStatusOK {
 	return &GetFirmwareStatusOK{}
 }
 
-/*GetFirmwareStatusOK handles this case with default header values.
+/*
+GetFirmwareStatusOK handles this case with default header values.
 
 OK
 */
@@ -65,7 +66,8 @@ func NewGetFirmwareStatusNoContent() *GetFirmwareStatusNoContent {
 	return &GetFirmwareStatusNoContent{}
 }
 
-/*GetFirmwareStatusNoContent handles this case with default header values.
+/*
+GetFirmwareStatusNoContent handles this case with default header values.
 
 No firmware status provided by this Thing.
 */

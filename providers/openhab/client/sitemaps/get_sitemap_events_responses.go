@@ -50,7 +50,8 @@ func NewGetSitemapEventsOK() *GetSitemapEventsOK {
 	return &GetSitemapEventsOK{}
 }
 
-/*GetSitemapEventsOK handles this case with default header values.
+/*
+GetSitemapEventsOK handles this case with default header values.
 
 OK
 */
@@ -71,7 +72,8 @@ func NewGetSitemapEventsBadRequest() *GetSitemapEventsBadRequest {
 	return &GetSitemapEventsBadRequest{}
 }
 
-/*GetSitemapEventsBadRequest handles this case with default header values.
+/*
+GetSitemapEventsBadRequest handles this case with default header values.
 
 Page not linked to the subscription.
 */
@@ -92,7 +94,8 @@ func NewGetSitemapEventsNotFound() *GetSitemapEventsNotFound {
 	return &GetSitemapEventsNotFound{}
 }
 
-/*GetSitemapEventsNotFound handles this case with default header values.
+/*
+GetSitemapEventsNotFound handles this case with default header values.
 
 Subscription not found.
 */

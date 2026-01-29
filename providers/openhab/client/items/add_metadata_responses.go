@@ -62,7 +62,8 @@ func NewAddMetadataOK() *AddMetadataOK {
 	return &AddMetadataOK{}
 }
 
-/*AddMetadataOK handles this case with default header values.
+/*
+AddMetadataOK handles this case with default header values.
 
 OK
 */
@@ -83,7 +84,8 @@ func NewAddMetadataCreated() *AddMetadataCreated {
 	return &AddMetadataCreated{}
 }
 
-/*AddMetadataCreated handles this case with default header values.
+/*
+AddMetadataCreated handles this case with default header values.
 
 Created
 */
@@ -104,7 +106,8 @@ func NewAddMetadataBadRequest() *AddMetadataBadRequest {
 	return &AddMetadataBadRequest{}
 }
 
-/*AddMetadataBadRequest handles this case with default header values.
+/*
+AddMetadataBadRequest handles this case with default header values.
 
 Metadata value empty.
 */
@@ -125,7 +128,8 @@ func NewAddMetadataNotFound() *AddMetadataNotFound {
 	return &AddMetadataNotFound{}
 }
 
-/*AddMetadataNotFound handles this case with default header values.
+/*
+AddMetadataNotFound handles this case with default header values.
 
 Item not found.
 */
@@ -146,7 +150,8 @@ func NewAddMetadataMethodNotAllowed() *AddMetadataMethodNotAllowed {
 	return &AddMetadataMethodNotAllowed{}
 }
 
-/*AddMetadataMethodNotAllowed handles this case with default header values.
+/*
+AddMetadataMethodNotAllowed handles this case with default header values.
 
 Metadata not editable.
 */

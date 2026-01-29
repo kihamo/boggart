@@ -50,7 +50,8 @@ func NewRemoveTagOK() *RemoveTagOK {
 	return &RemoveTagOK{}
 }
 
-/*RemoveTagOK handles this case with default header values.
+/*
+RemoveTagOK handles this case with default header values.
 
 OK
 */
@@ -71,7 +72,8 @@ func NewRemoveTagNotFound() *RemoveTagNotFound {
 	return &RemoveTagNotFound{}
 }
 
-/*RemoveTagNotFound handles this case with default header values.
+/*
+RemoveTagNotFound handles this case with default header values.
 
 Item not found.
 */
@@ -92,7 +94,8 @@ func NewRemoveTagMethodNotAllowed() *RemoveTagMethodNotAllowed {
 	return &RemoveTagMethodNotAllowed{}
 }
 
-/*RemoveTagMethodNotAllowed handles this case with default header values.
+/*
+RemoveTagMethodNotAllowed handles this case with default header values.
 
 Item not editable.
 */

@@ -7,7 +7,7 @@ import (
 var (
 	metricWeatherTemperature                    = snitch.NewGauge("weather_temperature_celsius", "Weather temperature in celsius")
 	metricEnvironmentStateTemperatureCelsius    = snitch.NewGauge("environment_state_temperature_celsius", "Environment current temperature in celsius")
-	metricEnvironmentTargetTemperatureCelsius    = snitch.NewGauge("environment_target_temperature_celsius", "Environment target temperature in celsius")
+	metricEnvironmentTargetTemperatureCelsius   = snitch.NewGauge("environment_target_temperature_celsius", "Environment target temperature in celsius")
 	metricHeaterHeatingFeedTemperatureCelsius   = snitch.NewGauge("heater_heating_feed_temperature_celsius", "Heating feed temperature in celsius")
 	metricHeaterHeatingReturnTemperatureCelsius = snitch.NewGauge("heater_heating_return_temperature_celsius", "Heating return temperature in celsius")
 	metricHeaterHeatingTargetTemperatureCelsius = snitch.NewGauge("heater_heating_target_temperature_celsius", "Heating target temperature in celsius")

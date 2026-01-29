@@ -56,7 +56,8 @@ func NewGetMeterValuesEverydayModeParamsWithHTTPClient(client *http.Client) *Get
 	}
 }
 
-/*GetMeterValuesEverydayModeParams contains all the parameters to send to the API endpoint
+/*
+GetMeterValuesEverydayModeParams contains all the parameters to send to the API endpoint
 for the get meter values everyday mode operation typically these are written to a http.Request
 */
 type GetMeterValuesEverydayModeParams struct {

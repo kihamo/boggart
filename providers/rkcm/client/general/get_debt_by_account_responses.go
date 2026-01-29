@@ -43,7 +43,8 @@ func NewGetDebtByAccountOK() *GetDebtByAccountOK {
 	return &GetDebtByAccountOK{}
 }
 
-/*GetDebtByAccountOK handles this case with default header values.
+/*
+GetDebtByAccountOK handles this case with default header values.
 
 Successful operation
 */
@@ -71,7 +72,8 @@ func (o *GetDebtByAccountOK) readResponse(response runtime.ClientResponse, consu
 	return nil
 }
 
-/*GetDebtByAccountOKBody get debt by account o k body
+/*
+GetDebtByAccountOKBody get debt by account o k body
 swagger:model GetDebtByAccountOKBody
 */
 type GetDebtByAccountOKBody struct {

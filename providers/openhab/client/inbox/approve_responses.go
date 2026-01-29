@@ -50,7 +50,8 @@ func NewApproveOK() *ApproveOK {
 	return &ApproveOK{}
 }
 
-/*ApproveOK handles this case with default header values.
+/*
+ApproveOK handles this case with default header values.
 
 OK
 */
@@ -71,7 +72,8 @@ func NewApproveNotFound() *ApproveNotFound {
 	return &ApproveNotFound{}
 }
 
-/*ApproveNotFound handles this case with default header values.
+/*
+ApproveNotFound handles this case with default header values.
 
 Thing unable to be approved.
 */
@@ -92,7 +94,8 @@ func NewApproveConflict() *ApproveConflict {
 	return &ApproveConflict{}
 }
 
-/*ApproveConflict handles this case with default header values.
+/*
+ApproveConflict handles this case with default header values.
 
 No binding found that supports this thing.
 */

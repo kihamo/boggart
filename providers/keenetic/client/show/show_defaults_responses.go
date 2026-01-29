@@ -45,7 +45,8 @@ func NewShowDefaultsOK() *ShowDefaultsOK {
 	return &ShowDefaultsOK{}
 }
 
-/* ShowDefaultsOK describes a response with status code 200, with default header values.
+/*
+	ShowDefaultsOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -77,7 +78,8 @@ func NewShowDefaultsUnauthorized() *ShowDefaultsUnauthorized {
 	return &ShowDefaultsUnauthorized{}
 }
 
-/* ShowDefaultsUnauthorized describes a response with status code 401, with default header values.
+/*
+	ShowDefaultsUnauthorized describes a response with status code 401, with default header values.
 
 Unauthorized operation
 */

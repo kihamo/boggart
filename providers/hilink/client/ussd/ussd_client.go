@@ -40,7 +40,7 @@ type ClientService interface {
 }
 
 /*
-  GetUSSD get u s s d API
+GetUSSD get u s s d API
 */
 func (a *Client) GetUSSD(params *GetUSSDParams, opts ...ClientOption) (*GetUSSDOK, error) {
 	// TODO: Validate the params before sending
@@ -77,7 +77,7 @@ func (a *Client) GetUSSD(params *GetUSSDParams, opts ...ClientOption) (*GetUSSDO
 }
 
 /*
-  GetUSSDStatus get u s s d status API
+GetUSSDStatus get u s s d status API
 */
 func (a *Client) GetUSSDStatus(params *GetUSSDStatusParams, opts ...ClientOption) (*GetUSSDStatusOK, error) {
 	// TODO: Validate the params before sending
@@ -114,7 +114,7 @@ func (a *Client) GetUSSDStatus(params *GetUSSDStatusParams, opts ...ClientOption
 }
 
 /*
-  ReleaseUSSD release u s s d API
+ReleaseUSSD release u s s d API
 */
 func (a *Client) ReleaseUSSD(params *ReleaseUSSDParams, opts ...ClientOption) (*ReleaseUSSDOK, error) {
 	// TODO: Validate the params before sending
@@ -151,7 +151,7 @@ func (a *Client) ReleaseUSSD(params *ReleaseUSSDParams, opts ...ClientOption) (*
 }
 
 /*
-  SendUSSD send u s s d API
+SendUSSD send u s s d API
 */
 func (a *Client) SendUSSD(params *SendUSSDParams, opts ...ClientOption) (*SendUSSDOK, error) {
 	// TODO: Validate the params before sending

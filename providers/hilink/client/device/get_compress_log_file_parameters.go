@@ -52,10 +52,12 @@ func NewGetCompressLogFileParamsWithHTTPClient(client *http.Client) *GetCompress
 	}
 }
 
-/* GetCompressLogFileParams contains all the parameters to send to the API endpoint
-   for the get compress log file operation.
+/*
+GetCompressLogFileParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get compress log file operation.
+
+	Typically these are written to a http.Request.
 */
 type GetCompressLogFileParams struct {
 	timeout    time.Duration

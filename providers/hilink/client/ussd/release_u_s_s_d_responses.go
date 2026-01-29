@@ -46,7 +46,8 @@ func NewReleaseUSSDOK() *ReleaseUSSDOK {
 	return &ReleaseUSSDOK{}
 }
 
-/* ReleaseUSSDOK describes a response with status code 200, with default header values.
+/*
+	ReleaseUSSDOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -78,7 +79,8 @@ func NewReleaseUSSDDefault(code int) *ReleaseUSSDDefault {
 	}
 }
 
-/* ReleaseUSSDDefault describes a response with status code -1, with default header values.
+/*
+	ReleaseUSSDDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */

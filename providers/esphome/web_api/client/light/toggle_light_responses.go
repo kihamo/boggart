@@ -38,7 +38,8 @@ func NewToggleLightOK() *ToggleLightOK {
 	return &ToggleLightOK{}
 }
 
-/*ToggleLightOK handles this case with default header values.
+/*
+ToggleLightOK handles this case with default header values.
 
 Successful operation
 */

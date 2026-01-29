@@ -21,10 +21,10 @@ func (d *HeatMeter) readMetrics(channel MetricsChannel) (float32, error) {
 }
 
 /*
-	Максимальная глубина архивов
-	- Часовые 62 суток (1488 значений)
-	- Суточные 6 месцев (184 суток)
-	- Месячные 5 лет (60 значений)
+Максимальная глубина архивов
+- Часовые 62 суток (1488 значений)
+- Суточные 6 месцев (184 суток)
+- Месячные 5 лет (60 значений)
 */
 func (d *HeatMeter) readArchive(channel MetricsChannel, start, end time.Time, t ArchiveType) (time.Time, []float32, error) {
 	/*

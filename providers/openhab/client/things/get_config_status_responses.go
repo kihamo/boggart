@@ -45,7 +45,8 @@ func NewGetConfigStatusOK() *GetConfigStatusOK {
 	return &GetConfigStatusOK{}
 }
 
-/*GetConfigStatusOK handles this case with default header values.
+/*
+GetConfigStatusOK handles this case with default header values.
 
 OK
 */
@@ -76,7 +77,8 @@ func NewGetConfigStatusNotFound() *GetConfigStatusNotFound {
 	return &GetConfigStatusNotFound{}
 }
 
-/*GetConfigStatusNotFound handles this case with default header values.
+/*
+GetConfigStatusNotFound handles this case with default header values.
 
 Thing not found.
 */

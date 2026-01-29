@@ -56,7 +56,8 @@ func NewGetFeedParamsWithHTTPClient(client *http.Client) *GetFeedParams {
 	}
 }
 
-/*GetFeedParams contains all the parameters to send to the API endpoint
+/*
+GetFeedParams contains all the parameters to send to the API endpoint
 for the get feed operation typically these are written to a http.Request
 */
 type GetFeedParams struct {

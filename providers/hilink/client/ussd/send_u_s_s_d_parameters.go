@@ -54,10 +54,12 @@ func NewSendUSSDParamsWithHTTPClient(client *http.Client) *SendUSSDParams {
 	}
 }
 
-/* SendUSSDParams contains all the parameters to send to the API endpoint
-   for the send u s s d operation.
+/*
+SendUSSDParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the send u s s d operation.
+
+	Typically these are written to a http.Request.
 */
 type SendUSSDParams struct {
 

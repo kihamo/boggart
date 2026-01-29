@@ -56,7 +56,8 @@ func NewSetEnabledParamsWithHTTPClient(client *http.Client) *SetEnabledParams {
 	}
 }
 
-/*SetEnabledParams contains all the parameters to send to the API endpoint
+/*
+SetEnabledParams contains all the parameters to send to the API endpoint
 for the set enabled operation typically these are written to a http.Request
 */
 type SetEnabledParams struct {

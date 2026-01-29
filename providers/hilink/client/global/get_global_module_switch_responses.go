@@ -46,7 +46,8 @@ func NewGetGlobalModuleSwitchOK() *GetGlobalModuleSwitchOK {
 	return &GetGlobalModuleSwitchOK{}
 }
 
-/* GetGlobalModuleSwitchOK describes a response with status code 200, with default header values.
+/*
+	GetGlobalModuleSwitchOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -80,7 +81,8 @@ func NewGetGlobalModuleSwitchDefault(code int) *GetGlobalModuleSwitchDefault {
 	}
 }
 
-/* GetGlobalModuleSwitchDefault describes a response with status code -1, with default header values.
+/*
+	GetGlobalModuleSwitchDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */

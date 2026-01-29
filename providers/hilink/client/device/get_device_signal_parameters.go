@@ -52,10 +52,12 @@ func NewGetDeviceSignalParamsWithHTTPClient(client *http.Client) *GetDeviceSigna
 	}
 }
 
-/* GetDeviceSignalParams contains all the parameters to send to the API endpoint
-   for the get device signal operation.
+/*
+GetDeviceSignalParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get device signal operation.
+
+	Typically these are written to a http.Request.
 */
 type GetDeviceSignalParams struct {
 	timeout    time.Duration

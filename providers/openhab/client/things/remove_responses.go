@@ -56,7 +56,8 @@ func NewRemoveOK() *RemoveOK {
 	return &RemoveOK{}
 }
 
-/*RemoveOK handles this case with default header values.
+/*
+RemoveOK handles this case with default header values.
 
 OK, was deleted.
 */
@@ -77,7 +78,8 @@ func NewRemoveAccepted() *RemoveAccepted {
 	return &RemoveAccepted{}
 }
 
-/*RemoveAccepted handles this case with default header values.
+/*
+RemoveAccepted handles this case with default header values.
 
 ACCEPTED for asynchronous deletion.
 */
@@ -98,7 +100,8 @@ func NewRemoveNotFound() *RemoveNotFound {
 	return &RemoveNotFound{}
 }
 
-/*RemoveNotFound handles this case with default header values.
+/*
+RemoveNotFound handles this case with default header values.
 
 Thing not found.
 */
@@ -119,7 +122,8 @@ func NewRemoveConflict() *RemoveConflict {
 	return &RemoveConflict{}
 }
 
-/*RemoveConflict handles this case with default header values.
+/*
+RemoveConflict handles this case with default header values.
 
 Thing could not be deleted because it's not editable.
 */

@@ -53,7 +53,8 @@ func NewUpdateOK() *UpdateOK {
 	return &UpdateOK{}
 }
 
-/*UpdateOK handles this case with default header values.
+/*
+UpdateOK handles this case with default header values.
 
 OK
 */
@@ -86,7 +87,8 @@ func NewUpdateNotFound() *UpdateNotFound {
 	return &UpdateNotFound{}
 }
 
-/*UpdateNotFound handles this case with default header values.
+/*
+UpdateNotFound handles this case with default header values.
 
 Thing not found.
 */
@@ -107,7 +109,8 @@ func NewUpdateConflict() *UpdateConflict {
 	return &UpdateConflict{}
 }
 
-/*UpdateConflict handles this case with default header values.
+/*
+UpdateConflict handles this case with default header values.
 
 Thing could not be updated as it is not editable.
 */

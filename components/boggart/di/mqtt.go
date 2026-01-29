@@ -238,9 +238,10 @@ func (c *MQTTContainer) Request(ctx context.Context, requestTopic, responseTopic
 }
 
 // смещение человеко понятное и стартует с единицы:
-//   offset == 0 игнорируется
-//   offset > 0 смещение от лева к праву 2 => (a [b] c d e f)
-//   offset < 0 смещение от права к леву -2 => (a b c d [e] f)
+//
+//	offset == 0 игнорируется
+//	offset > 0 смещение от лева к праву 2 => (a [b] c d e f)
+//	offset < 0 смещение от права к леву -2 => (a b c d [e] f)
 func (c *MQTTContainer) CheckValueInTopic(topic mqtt.Topic, value string, offset int) bool {
 	if value == "" || offset == 0 {
 		return false

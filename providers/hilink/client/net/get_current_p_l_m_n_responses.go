@@ -46,7 +46,8 @@ func NewGetCurrentPLMNOK() *GetCurrentPLMNOK {
 	return &GetCurrentPLMNOK{}
 }
 
-/* GetCurrentPLMNOK describes a response with status code 200, with default header values.
+/*
+	GetCurrentPLMNOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -80,7 +81,8 @@ func NewGetCurrentPLMNDefault(code int) *GetCurrentPLMNDefault {
 	}
 }
 
-/* GetCurrentPLMNDefault describes a response with status code -1, with default header values.
+/*
+	GetCurrentPLMNDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */

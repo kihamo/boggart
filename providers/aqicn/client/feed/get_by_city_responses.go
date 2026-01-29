@@ -47,7 +47,8 @@ func NewGetByCityOK() *GetByCityOK {
 	return &GetByCityOK{}
 }
 
-/*GetByCityOK handles this case with default header values.
+/*
+GetByCityOK handles this case with default header values.
 
 Successful operation
 */
@@ -82,7 +83,8 @@ func NewGetByCityDefault(code int) *GetByCityDefault {
 	}
 }
 
-/*GetByCityDefault handles this case with default header values.
+/*
+GetByCityDefault handles this case with default header values.
 
 Unexpected error
 */

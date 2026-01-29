@@ -46,7 +46,8 @@ func NewSendSMSOK() *SendSMSOK {
 	return &SendSMSOK{}
 }
 
-/* SendSMSOK describes a response with status code 200, with default header values.
+/*
+	SendSMSOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -78,7 +79,8 @@ func NewSendSMSDefault(code int) *SendSMSDefault {
 	}
 }
 
-/* SendSMSDefault describes a response with status code -1, with default header values.
+/*
+	SendSMSDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */

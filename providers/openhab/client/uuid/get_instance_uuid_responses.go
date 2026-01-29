@@ -39,7 +39,8 @@ func NewGetInstanceUUIDOK() *GetInstanceUUIDOK {
 	return &GetInstanceUUIDOK{}
 }
 
-/*GetInstanceUUIDOK handles this case with default header values.
+/*
+GetInstanceUUIDOK handles this case with default header values.
 
 OK
 */

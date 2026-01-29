@@ -50,7 +50,8 @@ func NewGetPageDataOK() *GetPageDataOK {
 	return &GetPageDataOK{}
 }
 
-/*GetPageDataOK handles this case with default header values.
+/*
+GetPageDataOK handles this case with default header values.
 
 OK
 */
@@ -71,7 +72,8 @@ func NewGetPageDataBadRequest() *GetPageDataBadRequest {
 	return &GetPageDataBadRequest{}
 }
 
-/*GetPageDataBadRequest handles this case with default header values.
+/*
+GetPageDataBadRequest handles this case with default header values.
 
 Invalid subscription id has been provided.
 */
@@ -92,7 +94,8 @@ func NewGetPageDataNotFound() *GetPageDataNotFound {
 	return &GetPageDataNotFound{}
 }
 
-/*GetPageDataNotFound handles this case with default header values.
+/*
+GetPageDataNotFound handles this case with default header values.
 
 Sitemap with requested name does not exist or page does not exist, or page refers to a non-linkable widget
 */

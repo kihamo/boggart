@@ -41,7 +41,8 @@ func NewGetMeterValuesEverydayModeOK() *GetMeterValuesEverydayModeOK {
 	return &GetMeterValuesEverydayModeOK{}
 }
 
-/*GetMeterValuesEverydayModeOK handles this case with default header values.
+/*
+GetMeterValuesEverydayModeOK handles this case with default header values.
 
 Successful operation
 */

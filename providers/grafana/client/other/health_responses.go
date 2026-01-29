@@ -41,7 +41,8 @@ func NewHealthOK() *HealthOK {
 	return &HealthOK{}
 }
 
-/*HealthOK handles this case with default header values.
+/*
+HealthOK handles this case with default header values.
 
 Successful operation
 */

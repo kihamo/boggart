@@ -43,7 +43,8 @@ func NewGetAppDeviceIDOK() *GetAppDeviceIDOK {
 	return &GetAppDeviceIDOK{}
 }
 
-/*GetAppDeviceIDOK handles this case with default header values.
+/*
+GetAppDeviceIDOK handles this case with default header values.
 
 successful operation
 */
@@ -71,7 +72,8 @@ func (o *GetAppDeviceIDOK) readResponse(response runtime.ClientResponse, consume
 	return nil
 }
 
-/*GetAppDeviceIDBody get app device ID body
+/*
+GetAppDeviceIDBody get app device ID body
 swagger:model GetAppDeviceIDBody
 */
 type GetAppDeviceIDBody struct {
@@ -154,7 +156,8 @@ func (o *GetAppDeviceIDBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*GetAppDeviceIDOKBody get app device ID o k body
+/*
+GetAppDeviceIDOKBody get app device ID o k body
 swagger:model GetAppDeviceIDOKBody
 */
 type GetAppDeviceIDOKBody struct {

@@ -105,12 +105,14 @@ func (c *Client) SysOsalNvItemInit(ctx context.Context, id uint16, value []byte)
 	return nil
 }
 
-/**
+/*
+*
 SYS_OSAL_NV_READ
 
 This command is used by the tester to read a single memory item in the target non-volatile memory. The command accepts an attribute Id value and returns the memory value present in the target for the specified attribute Id.
 
 Usage:
+
 	SREQ:
 		       1      |      1      |      1      |  2 |   1
 		Length = 0x03 | Cmd0 = 0x21 | Cmd1 = 0x08 | Id | Offset
@@ -150,12 +152,14 @@ func (c *Client) SysOsalNvRead(ctx context.Context, id uint16, offset uint8) (*N
 	return item, nil
 }
 
-/**
+/*
+*
 SYS_OSAL_NV_WRITE
 
 This command is used by the tester to write to a particular item in non-volatile memory. The command accepts an attribute Id and an attribute value. The attribute value is written to the location specified for the attribute Id in the target.
 
 Usage:
+
 	SREQ:
 		         1         |      1      |      1      |  2 |   1    |  1  | 1-128
 		Length = 0x04-0x84 | Cmd0 = 0x21 | Cmd1 = 0x09 | Id | Offset | Len | Value
@@ -170,7 +174,6 @@ Usage:
 		Length = 0x01 | Cmd0 = 0x61 | Cmd1 = 0x09 | Status
 	Attributes:
 		Status 1 byte Status is either Success (0) or Failure (1).
-
 */
 func (c *Client) SysOsalNvWrite(ctx context.Context, id uint16, offset uint8, value []byte) error {
 	dataIn := NewBuffer(nil)

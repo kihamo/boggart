@@ -58,7 +58,8 @@ func NewLinkParamsWithHTTPClient(client *http.Client) *LinkParams {
 	}
 }
 
-/*LinkParams contains all the parameters to send to the API endpoint
+/*
+LinkParams contains all the parameters to send to the API endpoint
 for the link operation typically these are written to a http.Request
 */
 type LinkParams struct {

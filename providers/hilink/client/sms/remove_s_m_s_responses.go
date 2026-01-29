@@ -48,7 +48,8 @@ func NewRemoveSMSOK() *RemoveSMSOK {
 	return &RemoveSMSOK{}
 }
 
-/* RemoveSMSOK describes a response with status code 200, with default header values.
+/*
+	RemoveSMSOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -80,7 +81,8 @@ func NewRemoveSMSDefault(code int) *RemoveSMSDefault {
 	}
 }
 
-/* RemoveSMSDefault describes a response with status code -1, with default header values.
+/*
+	RemoveSMSDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */
@@ -114,7 +116,8 @@ func (o *RemoveSMSDefault) readResponse(response runtime.ClientResponse, consume
 	return nil
 }
 
-/*RemoveSMSBody remove s m s body
+/*
+RemoveSMSBody remove s m s body
 swagger:model RemoveSMSBody
 */
 type RemoveSMSBody struct {

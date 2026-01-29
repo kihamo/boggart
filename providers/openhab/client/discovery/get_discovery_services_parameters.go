@@ -56,7 +56,8 @@ func NewGetDiscoveryServicesParamsWithHTTPClient(client *http.Client) *GetDiscov
 	}
 }
 
-/*GetDiscoveryServicesParams contains all the parameters to send to the API endpoint
+/*
+GetDiscoveryServicesParams contains all the parameters to send to the API endpoint
 for the get discovery services operation typically these are written to a http.Request
 */
 type GetDiscoveryServicesParams struct {

@@ -58,7 +58,8 @@ func NewSetEurekaInfoParamsWithHTTPClient(client *http.Client) *SetEurekaInfoPar
 	}
 }
 
-/*SetEurekaInfoParams contains all the parameters to send to the API endpoint
+/*
+SetEurekaInfoParams contains all the parameters to send to the API endpoint
 for the set eureka info operation typically these are written to a http.Request
 */
 type SetEurekaInfoParams struct {

@@ -38,7 +38,7 @@ type ClientService interface {
 }
 
 /*
-  GetAuth get auth API
+GetAuth get auth API
 */
 func (a *Client) GetAuth(params *GetAuthParams, opts ...ClientOption) (*GetAuthOK, error) {
 	// TODO: Validate the params before sending
@@ -76,7 +76,7 @@ func (a *Client) GetAuth(params *GetAuthParams, opts ...ClientOption) (*GetAuthO
 }
 
 /*
-  PostAuth post auth API
+PostAuth post auth API
 */
 func (a *Client) PostAuth(params *PostAuthParams, opts ...ClientOption) (*PostAuthOK, error) {
 	// TODO: Validate the params before sending

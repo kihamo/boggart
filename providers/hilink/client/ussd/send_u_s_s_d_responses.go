@@ -46,7 +46,8 @@ func NewSendUSSDOK() *SendUSSDOK {
 	return &SendUSSDOK{}
 }
 
-/* SendUSSDOK describes a response with status code 200, with default header values.
+/*
+	SendUSSDOK describes a response with status code 200, with default header values.
 
 Successful operation
 */
@@ -80,7 +81,8 @@ func NewSendUSSDDefault(code int) *SendUSSDDefault {
 	}
 }
 
-/* SendUSSDDefault describes a response with status code -1, with default header values.
+/*
+	SendUSSDDefault describes a response with status code -1, with default header values.
 
 Unexpected error
 */

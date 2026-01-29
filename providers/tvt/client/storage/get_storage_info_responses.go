@@ -49,7 +49,8 @@ func NewGetStorageInfoOK() *GetStorageInfoOK {
 	return &GetStorageInfoOK{}
 }
 
-/*GetStorageInfoOK handles this case with default header values.
+/*
+GetStorageInfoOK handles this case with default header values.
 
 Successful operation
 */
@@ -84,7 +85,8 @@ func NewGetStorageInfoDefault(code int) *GetStorageInfoDefault {
 	}
 }
 
-/*GetStorageInfoDefault handles this case with default header values.
+/*
+GetStorageInfoDefault handles this case with default header values.
 
 Unexpected error
 */
@@ -119,7 +121,8 @@ func (o *GetStorageInfoDefault) readResponse(response runtime.ClientResponse, co
 	return nil
 }
 
-/*GetStorageInfoOKBody get storage info o k body
+/*
+GetStorageInfoOKBody get storage info o k body
 swagger:model GetStorageInfoOKBody
 */
 type GetStorageInfoOKBody struct {
