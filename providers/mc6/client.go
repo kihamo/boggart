@@ -11,28 +11,28 @@ import (
 )
 
 const (
-	AddressRoomTemperature           uint16 = 0
-	AddressFloorTemperature          uint16 = 1
-	AddressHumidity                  uint16 = 2
-	AddressHeatingValve              uint16 = 3
-	AddressCoolingValve              uint16 = 4
-	AddressValve                     uint16 = 5
-	AddressFanHigh                   uint16 = 6
-	AddressFanMedium                 uint16 = 7
-	AddressFanLow                    uint16 = 8
-	AddressHeatingOutput             uint16 = 9
-	AddressHeat                      uint16 = 10
-	AddressHotWater                  uint16 = 11
-	AddressTouchLock                 uint16 = 12
-	AddressWindowsOpen               uint16 = 13
-	AddressHolidayFunction           uint16 = 14
-	AddressHoldingFunction           uint16 = 15
-	AddressBoostFunction             uint16 = 16
-	AddressFloorOverheat             uint16 = 17
-	AddressDeviceType                uint16 = 18
-	AddressAuxiliaryHeat             uint16 = 19
-	AddressFanSpeedNumbers           uint16 = 20
-	AddressSystemError               uint16 = 21
+	AddressRoomTemperature  uint16 = 0
+	AddressFloorTemperature uint16 = 1
+	AddressHumidity         uint16 = 2
+	AddressHeatingValve     uint16 = 3
+	AddressCoolingValve     uint16 = 4
+	AddressValve            uint16 = 5
+	AddressFanHigh          uint16 = 6
+	AddressFanMedium        uint16 = 7
+	AddressFanLow           uint16 = 8
+	AddressHeatingOutput    uint16 = 9
+	AddressHeat             uint16 = 10
+	AddressHotWater         uint16 = 11
+	AddressTouchLock        uint16 = 12
+	AddressWindowsOpen      uint16 = 13
+	AddressHolidayFunction  uint16 = 14
+	AddressHoldingFunction  uint16 = 15
+	AddressBoostFunction    uint16 = 16
+	AddressFloorOverheat    uint16 = 17
+	AddressDeviceType       uint16 = 18
+	AddressAuxiliaryHeat    uint16 = 19
+	AddressFanSpeedNumbers  uint16 = 20
+	AddressSystemError      uint16 = 21
 
 	AddressTemperatureFormat         uint16 = 60
 	AddressStatus                    uint16 = 61
@@ -45,9 +45,9 @@ const (
 	AddressHoldingTemperatureAndTime uint16 = 68
 	AddressHoldingTemperature        uint16 = 69
 	AddressHolidayStartTimeHigh      uint16 = 70
-        AddressHolidayStartTimeLow       uint16 = 71
+	AddressHolidayStartTimeLow       uint16 = 71
 	AddressHolidayEndTimeHigh        uint16 = 72
-        AddressHolidayEndTimeLow         uint16 = 73
+	AddressHolidayEndTimeLow         uint16 = 73
 	AddressOptimumStart              uint16 = 74
 	AddressBoostEndTimeHigh          uint16 = 75
 	AddressBoostEndTimeLow           uint16 = 76
@@ -78,13 +78,13 @@ const (
 	SystemModeVent       uint16 = 2
 	SystemModeDehumidity uint16 = 3
 	SystemModeAuto       uint16 = 4
-
-	writeResponseSuccess uint16 = 2
 )
 
 type MC6 struct {
 	client *modbus.Client
 }
+
+// https://wiki.wirenboard.com/wiki/Modbus
 
 func New(address *url.URL, opts ...modbus.Option) *MC6 {
 	address.Scheme = "tcp"
@@ -96,6 +96,25 @@ func New(address *url.URL, opts ...modbus.Option) *MC6 {
 
 func (m *MC6) Close() error {
 	return m.client.Close()
+}
+
+func (m *MC6) ReadRegister(address uint16) (value, error) {
+	v, err := m.client.ReadHoldingRegistersUint16(address)
+
+	return value(v), err
+}
+
+func (m *MC6) ReadAsMap(address, quantity uint16) (result map[uint16]value, err error) {
+	resultAsMap, err := m.client.ReadHoldingRegistersAsMap(address, quantity)
+	if err == nil {
+		result = make(map[uint16]value, len(resultAsMap))
+
+		for k, v := range resultAsMap {
+			result[k] = value(v)
+		}
+	}
+
+	return result, err
 }
 
 func (m *MC6) ReadTemperature(address uint16) (float64, error) {
@@ -137,10 +156,10 @@ func (m *MC6) Write(address, quantity uint16, payload []byte) (err error) {
 	response, err := m.client.WriteMultipleRegisters(address, quantity, payload)
 
 	if err == nil {
-		code := binary.BigEndian.Uint16(response)
+		writeRegisters := binary.BigEndian.Uint16(response)
 
-		if code != writeResponseSuccess {
-			err = fmt.Errorf("device return not success response %d", code)
+		if writeRegisters != quantity {
+			err = fmt.Errorf("registers write failed. Need %d registers written %d", quantity, writeRegisters)
 		}
 	}
 
@@ -151,14 +170,14 @@ func (m *MC6) WriteUint16(address, value uint16) error {
 	payload := make([]byte, 2)
 	binary.BigEndian.PutUint16(payload, value)
 
-	return m.Write(address, 2, payload)
+	return m.Write(address, 1, payload)
 }
 
 func (m *MC6) WriteUint32(address uint16, value uint32) error {
 	payload := make([]byte, 4)
 	binary.BigEndian.PutUint32(payload, value)
 
-	return m.Write(address, 2, payload)
+	return m.Write(address, 1, payload)
 }
 
 func (m *MC6) WriteBool(address uint16, flag bool) error {

@@ -2,6 +2,7 @@ package modbus
 
 import (
 	"encoding/binary"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -98,6 +99,26 @@ func (c *Client) ReadHoldingRegisters(address, quantity uint16) ([]byte, error) 
 	return c.CallWithTriesLimit(func() ([]byte, error) {
 		return c.Client.ReadHoldingRegisters(address, quantity)
 	})
+}
+
+func (c *Client) ReadHoldingRegistersAsMap(address, quantity uint16) (result map[uint16]uint16, err error) {
+	response, err := c.ReadHoldingRegisters(address, quantity)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(response) != int(quantity)*2 {
+		return nil, fmt.Errorf("wrong response payload length %d need %d", len(response), quantity*2)
+	}
+
+	result = make(map[uint16]uint16, int(quantity))
+
+	for i := uint16(0); i < quantity; i++ {
+		result[address+i] = binary.BigEndian.Uint16(response[i*2 : i*2+2])
+	}
+
+	return result, err
 }
 
 func (c *Client) ReadHoldingRegistersUint8(address uint16) (value uint8, err error) {

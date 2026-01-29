@@ -45,15 +45,15 @@ func (m *MC6) CoolingValve() (bool, error) {
 }
 
 func (m *MC6) FanHigh() (bool, error) {
-        return m.client.ReadHoldingRegistersBool(AddressFanHigh)
+	return m.client.ReadHoldingRegistersBool(AddressFanHigh)
 }
 
 func (m *MC6) FanMedium() (bool, error) {
-        return m.client.ReadHoldingRegistersBool(AddressFanMedium)
+	return m.client.ReadHoldingRegistersBool(AddressFanMedium)
 }
 
 func (m *MC6) FanLow() (bool, error) {
-        return m.client.ReadHoldingRegistersBool(AddressFanLow)
+	return m.client.ReadHoldingRegistersBool(AddressFanLow)
 }
 
 // статус активации режима нагрева (реле замкнуто)
@@ -62,15 +62,15 @@ func (m *MC6) HeatingOutput() (bool, error) {
 }
 
 func (m *MC6) Heat() (bool, error) {
-        return m.client.ReadHoldingRegistersBool(AddressHeat)
+	return m.client.ReadHoldingRegistersBool(AddressHeat)
 }
 
 func (m *MC6) HotWater() (bool, error) {
-        return m.client.ReadHoldingRegistersBool(AddressHotWater)
+	return m.client.ReadHoldingRegistersBool(AddressHotWater)
 }
 
 func (m *MC6) TouchLock() (bool, error) {
-        return m.client.ReadHoldingRegistersBool(AddressTouchLock)
+	return m.client.ReadHoldingRegistersBool(AddressTouchLock)
 }
 
 // по факту не работает, всегда отдает 0 (возможно из-за невключения самой функции)
@@ -79,7 +79,7 @@ func (m *MC6) WindowsOpen() (bool, error) {
 }
 
 func (m *MC6) HolidayFunction() (bool, error) {
-        return m.client.ReadHoldingRegistersBool(AddressHolidayFunction)
+	return m.client.ReadHoldingRegistersBool(AddressHolidayFunction)
 }
 
 func (m *MC6) HoldingFunction() (bool, error) {
@@ -188,7 +188,7 @@ func (m *MC6) OptimumStart() (bool, error) {
 }
 
 func (m *MC6) Boost() (bool, error) {
-        return m.client.ReadHoldingRegistersBool(AddressBoost)
+	return m.client.ReadHoldingRegistersBool(AddressBoost)
 }
 
 func (m *MC6) PanelLock() (bool, error) {
