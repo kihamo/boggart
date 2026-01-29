@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"slices"
 	"time"
 
 	"github.com/kihamo/boggart/protocols/modbus"
@@ -104,8 +105,13 @@ func (m *MC6) ReadRegister(address uint16) (value, error) {
 	return value(v), err
 }
 
-func (m *MC6) ReadAsMap(address, quantity uint16) (result map[uint16]value, err error) {
-	resultAsMap, err := m.client.ReadHoldingRegistersAsMap(address, quantity)
+func (m *MC6) ReadAsMap(addresses ...uint16) (result map[uint16]value, err error) {
+	addressStart := slices.Min(addresses)
+	addressEnd := slices.Max(addresses)
+
+	quantity := addressEnd - addressStart + 1
+
+	resultAsMap, err := m.client.ReadHoldingRegistersAsMap(addressStart, quantity)
 	if err == nil {
 		result = make(map[uint16]value, len(resultAsMap))
 

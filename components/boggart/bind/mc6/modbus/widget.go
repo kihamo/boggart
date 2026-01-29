@@ -35,7 +35,7 @@ func (b *Bind) WidgetHandler(_ *dashboard.Response, r *dashboard.Request) {
 			}
 		}
 
-		registers, err := provider.ReadAsMap(mc6.AddressRoomTemperature, 3)
+		registers, err := provider.ReadAsMap(mc6.AddressRoomTemperature, mc6.AddressHumidity)
 		if err != nil {
 			widget.FlashError(r, "Get sensors value failed with error %v", "", err)
 		} else {
@@ -53,7 +53,7 @@ func (b *Bind) WidgetHandler(_ *dashboard.Response, r *dashboard.Request) {
 		}
 
 	case "status":
-		registers, err := provider.ReadAsMap(mc6.AddressHeatingValve, 19)
+		registers, err := provider.ReadAsMap(mc6.AddressHeatingValve, mc6.AddressSystemError)
 		if err != nil {
 			widget.FlashError(r, "Get statuses failed with error %v", "", err)
 		} else {

@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"go.uber.org/multierr"
+
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/boggart/components/mqtt"
-	"go.uber.org/multierr"
+	"github.com/kihamo/boggart/providers/mc6"
 )
 
 func (b *Bind) Tasks() []tasks.Task {
@@ -111,10 +113,10 @@ func (b *Bind) taskDeviceTypeHandler(ctx context.Context) error {
 	// tasks
 	_, e := b.Workers().RegisterTask(
 		tasks.NewTask().
-			WithName("state-updater").
+			WithName("read-write-registers-updater").
 			WithHandler(
 				b.Workers().WrapTaskHandlerIsOnline(
-					tasks.HandlerFuncFromShortToLong(b.taskStateUpdaterHandler),
+					tasks.HandlerFuncFromShortToLong(b.taskReadWriteRegistersUpdaterHandler),
 				),
 			).
 			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.StatusUpdaterInterval)),
@@ -126,10 +128,10 @@ func (b *Bind) taskDeviceTypeHandler(ctx context.Context) error {
 
 	_, e = b.Workers().RegisterTask(
 		tasks.NewTask().
-			WithName("sensor-updater").
+			WithName("read-only-registers-updater").
 			WithHandler(
 				b.Workers().WrapTaskHandlerIsOnline(
-					tasks.HandlerFuncFromShortToLong(b.taskSensorUpdaterHandler),
+					tasks.HandlerFuncFromShortToLong(b.taskReadOnlyRegistersUpdaterHandler),
 				),
 			).
 			WithSchedule(tasks.ScheduleWithDuration(tasks.ScheduleNow(), cfg.SensorUpdaterInterval)),
@@ -142,137 +144,64 @@ func (b *Bind) taskDeviceTypeHandler(ctx context.Context) error {
 	return err
 }
 
-func (b *Bind) taskStateUpdaterHandler(ctx context.Context) error {
+func (b *Bind) taskReadWriteRegistersUpdaterHandler(ctx context.Context) error {
 	deviceType, err := b.DeviceType(ctx)
 	if err != nil {
 		return fmt.Errorf("get device type failed: %w", err)
 	}
 
 	provider := b.Provider()
+	registers, e := provider.ReadAsMap(mc6.AddressStatus, mc6.AddressHoldingTime)
+	if err != nil {
+		return multierr.Append(err, e)
+	}
+
 	id := b.Meta().ID()
 	cfg := b.config()
 
-	if deviceType.IsSupportedStatus() {
-		if val, e := provider.Status(); e == nil {
-			if e = b.MQTT().PublishAsync(ctx, cfg.TopicStatusState.Format(id), val); e != nil {
-				err = multierr.Append(err, e)
-			}
-		} else {
-			err = multierr.Append(err, fmt.Errorf("get status failed: %w", e))
+	if k := mc6.AddressStatus; deviceType.IsSupported(k) {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicStatusState.Format(id), registers[k].Bool()); e != nil {
+			err = multierr.Append(err, e)
 		}
 	}
 
-	if deviceType.IsSupportedHeatingValve() {
-		if val, e := provider.HeatingValve(); e == nil {
-			if e = b.MQTT().PublishAsync(ctx, cfg.TopicHeatingValve.Format(id), val); e != nil {
-				err = multierr.Append(err, e)
-			}
-		} else {
-			err = multierr.Append(err, fmt.Errorf("get heating valve status failed: %w", e))
+	if k := mc6.AddressSystemMode; deviceType.IsSupported(k) {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicSystemModeState.Format(id), registers[k].Uint()); e != nil {
+			err = multierr.Append(err, e)
 		}
 	}
 
-	if deviceType.IsSupportedCoolingValve() {
-		if val, e := provider.CoolingValve(); e == nil {
-			if e = b.MQTT().PublishAsync(ctx, cfg.TopicCoolingValve.Format(id), val); e != nil {
-				err = multierr.Append(err, e)
-			}
-		} else {
-			err = multierr.Append(err, fmt.Errorf("get cooling valve status failed: %w", e))
+	if k := mc6.AddressFanSpeed; deviceType.IsSupported(k) {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicFanSpeedState.Format(id), registers[k].Uint()); e != nil {
+			err = multierr.Append(err, e)
 		}
 	}
 
-	if deviceType.IsSupportedHeatingOutput() {
-		if val, e := provider.HeatingOutput(); e == nil {
-			if e = b.MQTT().PublishAsync(ctx, cfg.TopicHeatingOutputStatus.Format(id), val); e != nil {
-				err = multierr.Append(err, e)
-			}
-		} else {
-			err = multierr.Append(err, fmt.Errorf("get heating output status failed: %w", e))
+	if k := mc6.AddressTargetTemperature; deviceType.IsSupported(k) {
+		metricTargetTemperature.With("id", id).Set(registers[k].Temperature())
+
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicTargetTemperatureState.Format(id), registers[k].Temperature()); e != nil {
+			err = multierr.Append(err, e)
 		}
 	}
 
-	if deviceType.IsSupportedHoldingFunction() {
-		if val, e := provider.HoldingFunction(); e == nil {
-			if e = b.MQTT().PublishAsync(ctx, cfg.TopicHoldingFunction.Format(id), val); e != nil {
-				err = multierr.Append(err, e)
-			}
-		} else {
-			err = multierr.Append(err, fmt.Errorf("get holding function failed: %w", e))
+	if k := mc6.AddressAway; deviceType.IsSupported(k) {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicAwayState.Format(id), registers[k].Bool()); e != nil {
+			err = multierr.Append(err, e)
 		}
 	}
 
-	if deviceType.IsSupportedFloorOverheat() {
-		if val, e := provider.FloorOverheat(); e == nil {
-			if e = b.MQTT().PublishAsync(ctx, cfg.TopicFloorOverheat.Format(id), val); e != nil {
-				err = multierr.Append(err, e)
-			}
-		} else {
-			err = multierr.Append(err, fmt.Errorf("get floor overheat failed: %w", e))
+	if k := mc6.AddressAwayTemperature; deviceType.IsSupported(k) {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicAwayTemperatureState.Format(id), registers[k].Temperature()); e != nil {
+			err = multierr.Append(err, e)
 		}
 	}
 
-	if deviceType.IsSupportedFanSpeedNumbers() {
-		if val, e := provider.FanSpeedNumbers(); e == nil {
-			if e = b.MQTT().PublishAsync(ctx, cfg.TopicFanSpeedNumbers.Format(id), val); e != nil {
-				err = multierr.Append(err, e)
-			}
-		} else {
-			err = multierr.Append(err, fmt.Errorf("get fan speed mode failed: %w", e))
-		}
-	}
-
-	if deviceType.IsSupportedSystemMode() {
-		if val, e := provider.SystemMode(); e == nil {
-			if e = b.MQTT().PublishAsync(ctx, cfg.TopicSystemModeState.Format(id), val); e != nil {
-				err = multierr.Append(err, e)
-			}
-		} else {
-			err = multierr.Append(err, fmt.Errorf("get system mode state failed: %w", e))
-		}
-	}
-
-	if deviceType.IsSupportedFanSpeed() {
-		if val, e := provider.FanSpeed(); e == nil {
-			if e = b.MQTT().PublishAsync(ctx, cfg.TopicFanSpeedState.Format(id), val); e != nil {
-				err = multierr.Append(err, e)
-			}
-		} else {
-			err = multierr.Append(err, fmt.Errorf("get fan speed state failed: %w", e))
-		}
-	}
-
-	if deviceType.IsSupportedTargetTemperature() {
-		if val, e := provider.TargetTemperature(); e == nil {
-			metricTargetTemperature.With("id", id).Set(val)
-
-			if e = b.MQTT().PublishAsync(ctx, cfg.TopicTargetTemperatureState.Format(id), val); e != nil {
-				err = multierr.Append(err, e)
-			}
-		} else {
-			err = multierr.Append(err, fmt.Errorf("get target temperature state failed: %w", e))
-		}
-	}
-
-	if deviceType.IsSupportedAway() {
-		if val, e := provider.Away(); e == nil {
-			if e = b.MQTT().PublishAsync(ctx, cfg.TopicAwayState.Format(id), val); e != nil {
-				err = multierr.Append(err, e)
-			}
-		} else {
-			err = multierr.Append(err, fmt.Errorf("get away state failed: %w", e))
-		}
-	}
-
-	if deviceType.IsSupportedAwayTemperature() {
-		if val, e := provider.AwayTemperature(); e == nil {
-			if e = b.MQTT().PublishAsync(ctx, cfg.TopicAwayTemperatureState.Format(id), val); e != nil {
-				err = multierr.Append(err, e)
-			}
-		} else {
-			err = multierr.Append(err, fmt.Errorf("get away temperature state failed: %w", e))
-		}
-	}
+	//
+	//
+	// TODO:
+	//
+	//
 
 	if deviceType.IsSupportedHoldingTemperatureAndTime() {
 		if temp, tm, e := provider.HoldingTemperatureAndTime(); e == nil {
@@ -310,49 +239,78 @@ func (b *Bind) taskStateUpdaterHandler(ctx context.Context) error {
 	return err
 }
 
-func (b *Bind) taskSensorUpdaterHandler(ctx context.Context) error {
+func (b *Bind) taskReadOnlyRegistersUpdaterHandler(ctx context.Context) error {
 	deviceType, err := b.DeviceType(ctx)
 	if err != nil {
 		return fmt.Errorf("get device type failed: %w", err)
 	}
 
 	provider := b.Provider()
+	registers, e := provider.ReadAsMap(mc6.AddressRoomTemperature, mc6.AddressFanSpeedNumbers)
+	if e != nil {
+		return multierr.Append(err, e)
+	}
+
 	id := b.Meta().ID()
 	cfg := b.config()
 
-	if deviceType.IsSupportedRoomTemperature() {
-		if val, e := provider.RoomTemperature(); e == nil {
-			metricRoomTemperature.With("id", id).Set(val)
+	if k := mc6.AddressRoomTemperature; deviceType.IsSupported(k) {
+		metricRoomTemperature.With("id", id).Set(registers[k].Temperature())
 
-			if e = b.MQTT().PublishAsync(ctx, cfg.TopicRoomTemperature.Format(id), val); e != nil {
-				err = multierr.Append(err, fmt.Errorf("get room temperature failed: %w", e))
-			}
-		} else {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicRoomTemperature.Format(id), registers[k].Temperature()); e != nil {
+			err = multierr.Append(err, fmt.Errorf("get room temperature failed: %w", e))
+		}
+	}
+
+	if k := mc6.AddressFloorTemperature; deviceType.IsSupported(k) {
+		metricFloorTemperature.With("id", id).Set(registers[k].Temperature())
+
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicFloorTemperature.Format(id), registers[k].Temperature()); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
 
-	if deviceType.IsSupportedFloorTemperature() {
-		if val, e := provider.FloorTemperature(); e == nil {
-			metricFloorTemperature.With("id", id).Set(val)
+	if k := mc6.AddressHumidity; deviceType.IsSupported(k) {
+		metricHumidity.With("id", id).Set(float64(registers[k].Uint()))
 
-			if e = b.MQTT().PublishAsync(ctx, cfg.TopicFloorTemperature.Format(id), val); e != nil {
-				err = multierr.Append(err, e)
-			}
-		} else {
-			err = multierr.Append(err, fmt.Errorf("get floor temperature failed: %w", e))
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicHumidity.Format(id), registers[k].Uint()); e != nil {
+			err = multierr.Append(err, e)
 		}
 	}
 
-	if deviceType.IsSupportedHumidity() {
-		if val, e := provider.Humidity(); e == nil {
-			metricHumidity.With("id", id).Set(float64(val))
+	if k := mc6.AddressHeatingValve; deviceType.IsSupported(k) {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicHeatingValve.Format(id), registers[k].Bool()); e != nil {
+			err = multierr.Append(err, e)
+		}
+	}
 
-			if e = b.MQTT().PublishAsync(ctx, cfg.TopicHumidity.Format(id), val); e != nil {
-				err = multierr.Append(err, e)
-			}
-		} else {
-			err = multierr.Append(err, fmt.Errorf("get humidity failed: %w", e))
+	if k := mc6.AddressCoolingValve; deviceType.IsSupported(k) {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicCoolingValve.Format(id), registers[k].Bool()); e != nil {
+			err = multierr.Append(err, e)
+		}
+	}
+
+	if k := mc6.AddressHeatingOutput; deviceType.IsSupported(k) {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicHeatingOutputStatus.Format(id), registers[k].Bool()); e != nil {
+			err = multierr.Append(err, e)
+		}
+	}
+
+	if k := mc6.AddressHoldingFunction; deviceType.IsSupported(k) {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicHoldingFunction.Format(id), registers[k].Bool()); e != nil {
+			err = multierr.Append(err, e)
+		}
+	}
+
+	if k := mc6.AddressFloorOverheat; deviceType.IsSupported(k) {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicFloorOverheat.Format(id), registers[k].Bool()); e != nil {
+			err = multierr.Append(err, e)
+		}
+	}
+
+	if k := mc6.AddressFanSpeedNumbers; deviceType.IsSupported(k) {
+		if e = b.MQTT().PublishAsync(ctx, cfg.TopicFanSpeedNumbers.Format(id), registers[k].Uint()); e != nil {
+			err = multierr.Append(err, e)
 		}
 	}
 
