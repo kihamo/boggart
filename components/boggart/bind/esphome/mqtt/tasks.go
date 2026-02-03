@@ -7,7 +7,7 @@ import (
 
 	"github.com/kihamo/boggart/components/boggart/tasks"
 	"github.com/kihamo/snitch"
-	"github.com/prometheus/client_model/go"
+	io_prometheus_client "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
 )
 
@@ -82,10 +82,6 @@ func (b *Bind) taskImportMetricsHandler(ctx context.Context) error {
 			innerMetric = metricBinarySensorValue
 		case "esphome_binary_sensor_failed":
 			innerMetric = metricBinarySensorFailed
-		case "esphome_text_sensor_value":
-			innerMetric = metricTextSensorValue
-		case "esphome_text_sensor_failed":
-			innerMetric = metricTextSensorFailed
 		case "esphome_fan_value":
 			innerMetric = metricFanValue
 		case "esphome_fan_failed":
@@ -108,6 +104,56 @@ func (b *Bind) taskImportMetricsHandler(ctx context.Context) error {
 			innerMetric = metricSwitchValue
 		case "esphome_switch_failed":
 			innerMetric = metricSwitchFailed
+		case "esphome_lock_value":
+			innerMetric = metricLockValue
+		case "esphome_lock_failed":
+			innerMetric = metricLockFailed
+		case "esphome_text_sensor_value":
+			innerMetric = metricTextSensorValue
+		case "esphome_text_sensor_failed":
+			innerMetric = metricTextSensorFailed
+		case "esphome_text_value":
+			innerMetric = metricTextValue
+		case "esphome_text_failed":
+			innerMetric = metricTextFailed
+		case "esphome_event_value":
+			innerMetric = metricEventValue
+		case "esphome_event_failed":
+			innerMetric = metricEventFailed
+		case "esphome_number_value":
+			innerMetric = metricNumberValue
+		case "esphome_number_failed":
+			innerMetric = metricNumberFailed
+		case "esphome_select_value":
+			innerMetric = metriceSelectValue
+		case "esphome_select_failed":
+			innerMetric = metricSelectFailed
+		case "esphome_media_player_state_value":
+			innerMetric = metricMediaPlayerStateValue
+		case "esphome_media_player_volume":
+			innerMetric = metricMediaPlayerVolume
+		case "esphome_media_player_is_muted":
+			innerMetric = metricMediaPlayerIsMuted
+		case "esphome_media_player_failed":
+			innerMetric = metricMediaPlayerFailed
+		case "esphome_update_entity_state":
+			innerMetric = metricUpdateEntityState
+		case "esphome_update_entity_info":
+			innerMetric = metricUpdateEntityInfo
+		case "esphome_update_entity_failed":
+			innerMetric = metricUpdateEntityFailed
+		case "esphome_valve_operation":
+			innerMetric = metricValveOperation
+		case "esphome_valve_failed":
+			innerMetric = metricValveFailed
+		case "esphome_valve_position":
+			innerMetric = metricValvePosition
+		case "esphome_climate_setting":
+			innerMetric = metricClimateSetting
+		case "esphome_climate_value":
+			innerMetric = metricClimateValue
+		case "esphome_climate_failed":
+			innerMetric = metricClimateFailed
 		}
 
 		if innerMetric == nil {
