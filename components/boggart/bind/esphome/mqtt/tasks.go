@@ -82,6 +82,10 @@ func (b *Bind) taskImportMetricsHandler(ctx context.Context) error {
 			innerMetric = metricBinarySensorValue
 		case "esphome_binary_sensor_failed":
 			innerMetric = metricBinarySensorFailed
+		case "esphome_text_sensor_value":
+			innerMetric = metricTextSensorValue
+		case "esphome_text_sensor_failed":
+			innerMetric = metricTextSensorFailed
 		case "esphome_fan_value":
 			innerMetric = metricFanValue
 		case "esphome_fan_failed":
