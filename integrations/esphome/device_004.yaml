@@ -99,7 +99,7 @@ switch:
     on_turn_on:
       then:
         - switch.template.publish:
-            id: aquastorozh
+            id: aquastorozh_toggle
             state: ON
         - delay: 300ms
         - switch.turn_off: aquastorozh_enabled
@@ -114,14 +114,14 @@ switch:
     on_turn_on:
       then:
         - switch.template.publish:
-            id: aquastorozh
+            id: aquastorozh_toggle
             state: OFF
         - delay: 300ms
         - switch.turn_off: aquastorozh_disable
     internal: true
   - platform: template
-    id: "aquastorozh"
-    name: "Aquastorozh on/off"
+    id: "aquastorozh_toggle"
+    name: "Aquastorozh toggle"
     turn_on_action:
       - switch.turn_on: aquastorozh_enabled
     turn_off_action:
