@@ -125,7 +125,7 @@ func (b *Bind) taskImportMetricsHandler(ctx context.Context) error {
 		case "esphome_number_failed":
 			innerMetric = metricNumberFailed
 		case "esphome_select_value":
-			innerMetric = metriceSelectValue
+			innerMetric = metricSelectValue
 		case "esphome_select_failed":
 			innerMetric = metricSelectFailed
 		case "esphome_media_player_state_value":
