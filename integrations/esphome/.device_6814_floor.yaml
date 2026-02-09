@@ -13,15 +13,15 @@ switch:
       sorting_weight: 1
 
 sensor:
-  - platform: mqtt_subscribe
-    id: temperature_room_${id}
-    name: Temperature room ${name}
-    topic: "boggart/mc6/villa-thermostat-${topic_postfix}/temperature/room/state"
-    icon: mdi:home-thermometer
-    web_server:
-      sorting_group_id: ${id}
-      sorting_weight: 2
-    # todo: script calculate room + floor + target
+#  - platform: mqtt_subscribe
+#    id: temperature_room_${id}
+#    name: Temperature room ${name}
+#    topic: "boggart/mc6/villa-thermostat-${topic_postfix}/temperature/room/state"
+#    icon: mdi:home-thermometer
+#    web_server:
+#      sorting_group_id: ${id}
+#      sorting_weight: 2
+#    # todo: script calculate room + floor + target
   - platform: mqtt_subscribe
     id: temperature_floor_${id}
     name: Temperature floor ${name}
@@ -30,11 +30,10 @@ sensor:
     filters:
       # округляем и усредняем присылаемые значение, чтобы сгладить колебания температуры
       # иначе при приближению к таргету он начнет передергивать привод постояно
-      - round: 1
       - sliding_window_moving_average:
-          window_size: 5
-          send_every: 5
-          send_first_at: 1
+          window_size: 10 # фактически раз в 10 минут, так как показания снимаются каждую минуту
+          send_every: 3
+      - round: 1
     web_server:
       sorting_group_id: ${id}
       sorting_weight: 3
@@ -66,19 +65,22 @@ script:
   - id: toggle_relay_by_target_temperature_${id}
     then:
       - lambda: |-
-          // auto rootT = id(temperature_room_${id}).state;
-          auto floorT = id(temperature_floor_${id}).state;
-          auto targetT = id(temperature_floor_target_${id}).state;
+          float floorT = id(temperature_floor_${id}).state;
+          float targetT = id(temperature_floor_target_${id}).state;
           auto relay = id(relay_${id}).state;
 
-          // включаем нагрев, если до таргета не хватает больше чем 1 градус
-          if (targetT > floorT && relay) {
-            id(relay_${id}).turn_off(); // on?
+          // ESP_LOGD("thermostat", "Fire event for ${id}. Floor: %f target: %f relay: %s compare: %s", floorT, targetT, relay ? "ON" : "OFF", targetT > floorT ? "ON" : "OFF");
 
-            ESP_LOGI("thermostat", "Servo ON for ${id}. Floor: %f target: %f relay: %s", floorT, targetT, relay ? "ON" : "OFF");
+          // включаем нагрев, если до таргета не хватает больше чем 1 градус
+          if (targetT > floorT) {
+            if (relay) {
+              id(relay_${id}).turn_off();
+
+              ESP_LOGI("thermostat", "Servo turn OFF for ${id}. Floor: %f target: %f relay: %s", floorT, targetT, relay ? "ON" : "OFF");
+            }
           // если остается меньше одного градус или таргет ниже, то начинаем выключать
           } else if (!relay) {
-            id(relay_${id}).turn_on(); // off?
+            id(relay_${id}).turn_on();
 
-            ESP_LOGI("thermostat", "Servo OFF for ${id}. Floor: %f target: %f relay: %s", floorT, targetT, relay ? "ON" : "OFF");
+            ESP_LOGI("thermostat", "Servo turn ON for ${id}. Floor: %f target: %f relay: %s", floorT, targetT, relay ? "ON" : "OFF");
           }
