@@ -1,0 +1,137 @@
+substitutions:
+  node_name: !secret device_6815_node_name
+  ip_address: !secret device_6815_ip_address
+
+packages:
+  - !include ./_includes/common.yaml
+  - !include ./_includes/ethernet.yaml
+  - !include ./_includes/binary_sensor.yaml
+  - !include ./_includes/sensor.yaml
+  - !include ./_includes/switch.yaml
+  - !include ./_includes/text_sensor.yaml
+  - !include ./_includes/time.yaml
+  - !include ./_includes/debug.yaml
+
+esphome:
+  comment: !secret device_6815_comment
+
+web_server:
+    sorting_groups:
+    - id: inputs_di
+      name: "Digital inputs"
+      sorting_weight: -1
+    - id: inputs_gpio
+      name: "GPIOs"
+      sorting_weight: -2
+    - id: outputs
+      name: "Outputs"
+      sorting_weight: -3
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk:
+    pin: GPIO17
+    mode: CLK_OUT
+  phy_addr: 0
+
+uart:
+  - id: rs485
+    tx_pin: GPIO13
+    rx_pin: GPIO16
+    baud_rate: 9600
+
+remote_receiver:
+  pin:
+    number: GPIO2
+    ignore_strapping_warning: true
+
+remote_transmitter:
+  pin:
+    number: GPIO15
+    ignore_strapping_warning: true
+  carrier_duty_percent: 100%
+  non_blocking: true
+
+i2c:
+  sda: GPIO4
+  scl:
+    number: GPIO5
+    ignore_strapping_warning: true
+
+pcf8574:
+  - id: inputs_1_8
+    address: 0x22
+    pcf8575: false
+  - id: inputs_9_16
+    address: 0x21
+    pcf8575: false
+  - id: outputs_1_8
+    address: 0x24
+    pcf8575: false
+  - id: outputs_9_16
+    address: 0x25
+    pcf8575: false
+
+binary_sensor:
+  - platform: gpio
+    id: input_ht1
+    name: "HT1"
+    pin:
+      number: GPIO32
+      inverted: true
+    web_server:
+      sorting_group_id: inputs_gpio
+      sorting_weight: 10
+
+  - platform: gpio
+    id: input_ht2
+    name: "HT2"
+    pin:
+      number: GPIO33
+      inverted: true
+    web_server:
+      sorting_group_id: inputs_gpio
+      sorting_weight: 11
+  
+  - platform: gpio
+    id: input_ht3
+    name: "HT3"
+    pin:
+      number: GPIO14
+      inverted: true
+    web_server:
+      sorting_group_id: inputs_gpio
+      sorting_weight: 11
+
+  - platform: gpio
+    id: input_0
+    name: "Digital input #1"
+    pin:
+      pcf8574: inputs_1_8
+      number: 0
+      mode: INPUT
+      inverted: true
+    web_server:
+      sorting_group_id: inputs_di
+      sorting_weight: 10
+
+switch:
+  - platform: gpio
+    id: output_0
+    name: "Output 0"
+    icon: "mdi:gate"
+    pin:
+      pcf8574: outputs_1_8
+      number: 0
+      mode: OUTPUT
+      inverted: false
+    web_server:
+      sorting_group_id: outputs
+      sorting_weight: 10

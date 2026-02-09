@@ -1,0 +1,84 @@
+switch:
+  - platform: gpio
+    id: relay_${id}
+    name: Relay ${name}
+    pin:
+      pcf8574: outputs
+      number: ${relay}
+      mode: OUTPUT
+      inverted: true
+    icon: mdi:toggle-switch-variant
+    web_server:
+      sorting_group_id: ${id}
+      sorting_weight: 1
+
+sensor:
+  - platform: mqtt_subscribe
+    id: temperature_room_${id}
+    name: Temperature room ${name}
+    topic: "boggart/mc6/villa-thermostat-${topic_postfix}/temperature/room/state"
+    icon: mdi:home-thermometer
+    web_server:
+      sorting_group_id: ${id}
+      sorting_weight: 2
+    # todo: script calculate room + floor + target
+  - platform: mqtt_subscribe
+    id: temperature_floor_${id}
+    name: Temperature floor ${name}
+    topic: "boggart/mc6/villa-thermostat-${topic_postfix}/temperature/floor/state"
+    icon: mdi:thermometer-lines
+    filters:
+      # округляем и усредняем присылаемые значение, чтобы сгладить колебания температуры
+      # иначе при приближению к таргету он начнет передергивать привод постояно
+      - round: 1
+      - sliding_window_moving_average:
+          window_size: 5
+          send_every: 5
+          send_first_at: 1
+    web_server:
+      sorting_group_id: ${id}
+      sorting_weight: 3
+    on_value:
+      then:
+        - script.execute: toggle_relay_by_target_temperature_${id}
+
+number:
+  - platform: template
+    name: Target temperature floor ${name}
+    id: temperature_floor_target_${id}
+    min_value: ${temperature_target_value_min}
+    max_value: ${temperature_target_value_max}
+    step: ${temperature_target_step}
+    initial_value: ${temperature_target_value_initial}
+    mode: slider
+    optimistic: true
+    icon: mdi:thermometer-check
+    web_server:
+      sorting_group_id: ${id}
+      sorting_weight: 4
+    on_value:
+      then:
+        - script.execute: toggle_relay_by_target_temperature_${id}
+
+# https://community.home-assistant.io/t/reduce-the-size-of-config-file-yaml-many-repeats/499872/2
+
+script:
+  - id: toggle_relay_by_target_temperature_${id}
+    then:
+      - lambda: |-
+          // auto rootT = id(temperature_room_${id}).state;
+          auto floorT = id(temperature_floor_${id}).state;
+          auto targetT = id(temperature_floor_target_${id}).state;
+          auto relay = id(relay_${id}).state;
+
+          // включаем нагрев, если до таргета не хватает больше чем 1 градус
+          if (targetT > floorT && relay) {
+            id(relay_${id}).turn_off(); // on?
+
+            ESP_LOGI("thermostat", "Servo ON for ${id}. Floor: %f target: %f relay: %s", floorT, targetT, relay ? "ON" : "OFF");
+          // если остается меньше одного градус или таргет ниже, то начинаем выключать
+          } else if (!relay) {
+            id(relay_${id}).turn_on(); // off?
+
+            ESP_LOGI("thermostat", "Servo OFF for ${id}. Floor: %f target: %f relay: %s", floorT, targetT, relay ? "ON" : "OFF");
+          }

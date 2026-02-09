@@ -2,6 +2,11 @@ substitutions:
   node_name: !secret device_6814_node_name
   ip_address: !secret device_6814_ip_address
 
+  temperature_target_step: 0.5
+  temperature_target_value_min: 17
+  temperature_target_value_max: 27
+  temperature_target_value_initial: 22
+
 packages:
   - !include ./_includes/common.yaml
   - !include ./_includes/ethernet.yaml
@@ -12,11 +17,49 @@ packages:
   - !include ./_includes/time.yaml
   - !include ./_includes/debug.yaml
 
+  - !include { file: .device_6814_door.yaml, vars: { id : "sauna", name: "Sauna", gpio: '2' } }
+  - !include { file: .device_6814_door.yaml, vars: { id : "garage", name: "Garage", gpio: '3' } }
+  - !include { file: .device_6814_door.yaml, vars: { id : "boiler", name: "Boilerroom", gpio: '4' } }
+  - !include { file: .device_6814_door.yaml, vars: { id : "hallway", name: "Hallway", gpio: '5' } }
+  - !include { file: .device_6814_door.yaml, vars: { id : "livingroom_right", name: "Livingroom right", gpio: '6' } }
+  - !include { file: .device_6814_door.yaml, vars: { id : "livingroom_left", name: "Livingroom left", gpio: '7' } }
+
+  - !include { file: .device_6814_floor.yaml, vars: { id : "gameroom", name: "Gameroom", relay: 0, topic_postfix: "gameroom" } }
+  - !include { file: .device_6814_floor.yaml, vars: { id : "bathroom_floor_1", name: "Barhroom Floor 1", relay: 1, topic_postfix: "bathroom-floor1" } }
+  - !include { file: .device_6814_floor.yaml, vars: { id : "hallway", name: "Hallway", relay: 2, topic_postfix: "hallway" } }
+  - !include { file: .device_6814_floor.yaml, vars: { id : "kitchen", name: "Kitchen", relay: 3, topic_postfix: "kitchen" } }
+
 esphome:
   comment: !secret device_6814_comment
 
 web_server:
     sorting_groups:
+    - id: doors
+      name: "Doors"
+      sorting_weight: -99
+
+    - id: kitchen
+      name: "Kitchen"
+      sorting_weight: -98
+    - id: gameroom
+      name: "Gameroom"
+      sorting_weight: -97
+    - id: hallway
+      name: "Hallway"
+      sorting_weight: -96
+    - id: chillout
+      name: "Chillout"
+      sorting_weight: -95
+    - id: bathroom_floor_1
+      name: "Bathroom floor 1"
+      sorting_weight: -94
+    - id: bathroom_floor_2
+      name: "Bathroom floor 2"
+      sorting_weight: -93
+    - id: bathroom_master
+      name: "Bathroom master room"
+      sorting_weight: -92
+
     - id: inputs_di
       name: "Digital inputs"
       sorting_weight: -1
@@ -72,188 +115,24 @@ pcf8574:
     address: 0x24
 
 binary_sensor:
-  - platform: gpio
-    id: input_0
-    pin:
-      pcf8574: inputs
-      number: 0
-      mode: INPUT
-      inverted: true
-    web_server:
-      sorting_group_id: inputs_di
-      sorting_weight: 10
-
-  - platform: gpio
-    id: input_1
-    pin:
-      pcf8574: inputs
-      number: 1
-      mode: INPUT
-      inverted: true
-    web_server:
-      sorting_group_id: inputs_di
-      sorting_weight: 11
-
-  - platform: gpio
-    id: input_2
-    pin:
-      pcf8574: inputs
-      number: 2
-      mode: INPUT
-      inverted: true
-    web_server:
-      sorting_group_id: inputs_di
-      sorting_weight: 12
-
-  - platform: gpio
-    id: input_3
-    pin:
-      pcf8574: inputs
-      number: 3
-      mode: INPUT
-      inverted: true
-    web_server:
-      sorting_group_id: inputs_di
-      sorting_weight: 13
-
-  - platform: gpio
-    id: input_4
-    pin:
-      pcf8574: inputs
-      number: 4
-      mode: INPUT
-      inverted: true
-    web_server:
-      sorting_group_id: inputs_di
-      sorting_weight: 14
-
-  - platform: gpio
-    id: input_5
-    pin:
-      pcf8574: inputs
-      number: 5
-      mode: INPUT
-      inverted: true
-    web_server:
-      sorting_group_id: inputs_di
-      sorting_weight: 15
-
-  - platform: gpio
-    id: input_6
-    pin:
-      pcf8574: inputs
-      number: 6
-      mode: INPUT
-      inverted: true
-    web_server:
-      sorting_group_id: inputs_di
-      sorting_weight: 16
-
-  - platform: gpio
-    id: input_7
-    pin:
-      pcf8574: inputs
-      number: 7
-      mode: INPUT
-      inverted: true
-    web_server:
-      sorting_group_id: inputs_di
-      sorting_weight: 17
-
-switch:
-  - platform: gpio
-    id: relay_0
-    name: "Relay 0"
-    icon: "mdi:gate"
-    pin:
-      pcf8574: outputs
-      number: 0
-      mode: OUTPUT
-      inverted: false
-    web_server:
-      sorting_group_id: outputs_relayes
-      sorting_weight: 20
-
-  - platform: gpio
-    id: relay_1
-    name: "Relay 1"
-    pin:
-      pcf8574: outputs
-      number: 1
-      mode: OUTPUT
-      inverted: true
-    web_server:
-      sorting_group_id: outputs_relayes
-      sorting_weight: 21
-
-  - platform: gpio
-    name: "Relay 2"
-    id: relay_2
-    pin:
-      pcf8574: outputs
-      number: 2
-      mode: OUTPUT
-      inverted: true
-    web_server:
-      sorting_group_id: outputs_relayes
-      sorting_weight: 22
-
-  - platform: gpio
-    name: "Relay 3"
-    id: relay_3
-    pin:
-      pcf8574: outputs
-      number: 3
-      mode: OUTPUT
-      inverted: true
-    web_server:
-      sorting_group_id: outputs_relayes
-      sorting_weight: 23
-
-  - platform: gpio
-    name: "Relay 4"
-    id: relay_4
-    pin:
-      pcf8574: outputs
-      number: 4
-      mode: OUTPUT
-      inverted: true
-    web_server:
-      sorting_group_id: outputs_relayes
-      sorting_weight: 24
-
-  - platform: gpio
-    name: "Relay 5"
-    id: relay_5
-    pin:
-      pcf8574: outputs
-      number: 5
-      mode: OUTPUT
-      inverted: true
-    web_server:
-      sorting_group_id: outputs_relayes
-      sorting_weight: 25
-
-  - platform: gpio
-    name: "Relay 6"
-    id: relay_6
-    pin:
-      pcf8574: outputs
-      number: 6
-      mode: OUTPUT
-      inverted: true
-    web_server:
-      sorting_group_id: outputs_relayes
-      sorting_weight: 26
-
-  - platform: gpio
-    name: "Relay 7"
-    id: relay_7
-    pin:
-      pcf8574: outputs
-      number: 7
-      mode: OUTPUT
-      inverted: true
-    web_server:
-      sorting_group_id: outputs_relayes
-      sorting_weight: 27
+#  - platform: gpio
+#    id: input_0
+#    pin:
+#      pcf8574: inputs
+#      number: 0
+#      mode: INPUT
+#      inverted: true
+#    web_server:
+#      sorting_group_id: inputs_di
+#      sorting_weight: 10
+#
+#  - platform: gpio
+#    id: input_1
+#    pin:
+#      pcf8574: inputs
+#      number: 1
+#      mode: INPUT
+#      inverted: true
+#    web_server:
+#      sorting_group_id: inputs_di
+#      sorting_weight: 11

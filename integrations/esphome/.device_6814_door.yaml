@@ -1,0 +1,12 @@
+binary_sensor:
+  - platform: gpio
+    id: door_${id}
+    name: ${name} door
+    icon: mdi:door
+    pin:
+      pcf8574: inputs
+      number: ${gpio}
+      mode: INPUT
+      inverted: true
+    web_server:
+      sorting_group_id: doors
