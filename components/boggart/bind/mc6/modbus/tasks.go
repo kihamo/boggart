@@ -186,12 +186,16 @@ func (b *Bind) taskReadWriteRegistersUpdaterHandler(ctx context.Context) error {
 	}
 
 	if k := mc6.AddressAway; deviceType.IsSupported(k) {
+		metricAway.With("id", id).Set(float64(registers[k].Uint()))
+
 		if e = b.MQTT().PublishAsync(ctx, cfg.TopicAwayState.Format(id), registers[k].Bool()); e != nil {
 			err = multierr.Append(err, e)
 		}
 	}
 
 	if k := mc6.AddressAwayTemperature; deviceType.IsSupported(k) {
+		metricAwayTemperature.With("id", id).Set(registers[k].Temperature())
+
 		if e = b.MQTT().PublishAsync(ctx, cfg.TopicAwayTemperatureState.Format(id), registers[k].Temperature()); e != nil {
 			err = multierr.Append(err, e)
 		}

@@ -9,6 +9,8 @@ var (
 	metricFloorTemperature  = snitch.NewGauge("floor_temperature", "Current floor temperature")
 	metricTargetTemperature = snitch.NewGauge("target_temperature", "Target temperature")
 	metricHumidity          = snitch.NewGauge("humidity", "Current humidity")
+	metricAway              = snitch.NewGauge("away", "Away status")
+	metricAwayTemperature   = snitch.NewGauge("away_temperature", "Away temperature")
 )
 
 func (b *Bind) Describe(ch chan<- *snitch.Description) {
@@ -21,6 +23,8 @@ func (b *Bind) Describe(ch chan<- *snitch.Description) {
 	metricFloorTemperature.With("id", id).Describe(ch)
 	metricTargetTemperature.With("id", id).Describe(ch)
 	metricHumidity.With("id", id).Describe(ch)
+	metricAway.With("id", id).Describe(ch)
+	metricAwayTemperature.With("id", id).Describe(ch)
 }
 
 func (b *Bind) Collect(ch chan<- snitch.Metric) {
@@ -33,4 +37,6 @@ func (b *Bind) Collect(ch chan<- snitch.Metric) {
 	metricFloorTemperature.With("id", id).Collect(ch)
 	metricTargetTemperature.With("id", id).Collect(ch)
 	metricHumidity.With("id", id).Collect(ch)
+	metricAway.With("id", id).Collect(ch)
+	metricAwayTemperature.With("id", id).Collect(ch)
 }
