@@ -20,8 +20,8 @@ esp8266:
 
 switch:
   - platform: gpio
-    name: "Relay switch"
-    icon: "mdi:lightbulb_outline"
+    name: Light parking zone
+    icon: mdi:lightbulb_outline
     pin: GPIO12
     id: relay_1
     restore_mode: RESTORE_DEFAULT_OFF

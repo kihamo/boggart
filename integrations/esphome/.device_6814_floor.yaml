@@ -49,6 +49,7 @@ number:
     max_value: ${temperature_target_value_max}
     step: ${temperature_target_step}
     initial_value: ${temperature_target_value_initial}
+    restore_value: true
     mode: slider
     optimistic: true
     icon: mdi:thermometer-check
@@ -76,11 +77,11 @@ script:
             if (relay) {
               id(relay_${id}).turn_off();
 
-              ESP_LOGI("thermostat", "Servo turn OFF for ${id}. Floor: %f target: %f relay: %s", floorT, targetT, relay ? "ON" : "OFF");
+              ESP_LOGI("thermostat", "Servo OPEN for ${id}. Floor: %f target: %f relay: %s", floorT, targetT, relay ? "ON" : "OFF");
             }
           // если остается меньше одного градус или таргет ниже, то начинаем выключать
           } else if (!relay) {
             id(relay_${id}).turn_on();
 
-            ESP_LOGI("thermostat", "Servo turn ON for ${id}. Floor: %f target: %f relay: %s", floorT, targetT, relay ? "ON" : "OFF");
+            ESP_LOGI("thermostat", "Servo turn CLOSE for ${id}. Floor: %f target: %f relay: %s", floorT, targetT, relay ? "ON" : "OFF");
           }

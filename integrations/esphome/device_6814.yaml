@@ -25,9 +25,7 @@ packages:
   - !include { file: .device_6814_door.yaml, vars: { id : "livingroom_left", name: "Livingroom left", gpio: '7' } }
 
   - !include { file: .device_6814_floor.yaml, vars: { id : "gameroom", name: "Gameroom", relay: 0, topic_postfix: "gameroom" } }
-  - !include { file: .device_6814_floor.yaml, vars: { id : "bathroom_floor_1", name: "Barhroom Floor 1", relay: 1, topic_postfix: "bathroom-floor1" } }
   - !include { file: .device_6814_floor.yaml, vars: { id : "hallway", name: "Hallway", relay: 2, topic_postfix: "hallway" } }
-  - !include { file: .device_6814_floor.yaml, vars: { id : "kitchen", name: "Kitchen", relay: 3, topic_postfix: "kitchen" } }
 
 esphome:
   comment: !secret device_6814_comment
