@@ -218,7 +218,7 @@ func (d Device) IsSupportedBoostEndTimeLow() bool {
 	return d.IsSupported(AddressBoostEndTimeLow)
 }
 
-func (d Device) IsSupportedHBoost() bool {
+func (d Device) IsSupportedBoost() bool {
 	return d.IsSupported(AddressBoost)
 }
 

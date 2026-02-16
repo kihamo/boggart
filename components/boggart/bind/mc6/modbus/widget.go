@@ -3,9 +3,8 @@ package modbus
 import (
 	assetfs "github.com/elazarl/go-bindata-assetfs"
 
-	"github.com/kihamo/shadow/components/dashboard"
-
 	"github.com/kihamo/boggart/providers/mc6"
+	"github.com/kihamo/shadow/components/dashboard"
 )
 
 func (b *Bind) WidgetHandler(_ *dashboard.Response, r *dashboard.Request) {
@@ -130,11 +129,55 @@ func (b *Bind) WidgetHandler(_ *dashboard.Response, r *dashboard.Request) {
 			}
 		}
 
-	case "away":
+	case "mode":
+		if deviceType.IsSupported(mc6.AddressTemperatureFormat) {
+			if value, err := provider.TemperatureFormat(); err != nil {
+				widget.FlashError(r, "Get temperature format failed with error %v", "", err)
+			} else {
+				vars["temperature_format"] = value
+			}
+		}
 
-	case "hold":
+		registers, err := provider.ReadAsMap(mc6.AddressFanSpeed, mc6.AddressFloorTemperatureLimit)
+		if err != nil {
+			widget.FlashError(r, "Get mode registers failed with error %v", "", err)
+		} else {
+			if k := mc6.AddressFanSpeed; deviceType.IsSupported(k) {
+				vars["fan_speed"] = registers[k].Uint()
+			}
 
-	case "fan":
+			if k := mc6.AddressTargetTemperature; deviceType.IsSupported(k) {
+				vars["target_temperature"] = registers[k].Temperature()
+			}
+
+			if k := mc6.AddressAway; deviceType.IsSupported(k) {
+				vars["away"] = registers[k].Bool()
+			}
+
+			if k := mc6.AddressAwayTemperature; deviceType.IsSupported(k) {
+				vars["away_temperature"] = registers[k].Temperature()
+			}
+
+			if k := mc6.AddressHoldingTemperature; deviceType.IsSupported(k) {
+				vars["holding_temperature"] = registers[k].Temperature()
+			}
+
+			if k := mc6.AddressBoost; deviceType.IsSupported(k) {
+				vars["boost"] = registers[k].Bool()
+			}
+
+			if k := mc6.AddressTargetTemperatureMaximum; deviceType.IsSupported(k) {
+				vars["target_temperature_max"] = registers[k].Temperature()
+			}
+
+			if k := mc6.AddressTargetTemperatureMinimum; deviceType.IsSupported(k) {
+				vars["target_temperature_min"] = registers[k].Temperature()
+			}
+
+			if k := mc6.AddressFloorTemperatureLimit; deviceType.IsSupported(k) {
+				vars["floor_temperature_limit"] = registers[k].Temperature()
+			}
+		}
 
 	default:
 

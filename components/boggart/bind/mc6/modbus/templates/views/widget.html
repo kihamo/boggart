@@ -16,15 +16,7 @@
                             <li role="presentation"{{ if eq .action "" }} class="active"{{ end }}><a href="{{ if eq .action "" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}{{ end }}">{{ i18n "Device" . }}</a></li>
                             <li role="presentation"{{ if eq .action "sensors" }} class="active"{{ end }}><a href="{{ if eq .action "sensors" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=sensors{{ end }}">{{ i18n "Sensors" . }}</a></li>
                             <li role="presentation"{{ if eq .action "status" }} class="active"{{ end }}><a href="{{ if eq .action "status" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=status{{ end }}">{{ i18n "Status" . }}</a></li>
-                            {{ if .device.IsSupportedAway }}
-                            <li role="presentation"{{ if eq .action "away" }} class="active"{{ end }}><a href="{{ if eq .action "away" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=away{{ end }}">{{ i18n "Away" . }}</a></li>
-                            {{ end }}
-                            {{ if .device.IsSupportedHoldingFunction }}
-                            <li role="presentation"{{ if eq .action "hold" }} class="active"{{ end }}><a href="{{ if eq .action "hold" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=hold{{ end }}">{{ i18n "Hold" . }}</a></li>
-                            {{ end }}
-                            {{ if .device.IsSupportedFanSpeed }}
-                            <li role="presentation"{{ if eq .action "fan" }} class="active"{{ end }}><a href="{{ if eq .action "fan" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=fan{{ end }}">{{ i18n "Fan" . }}</a></li>
-                            {{ end }}
+                            <li role="presentation"{{ if eq .action "mode" }} class="active"{{ end }}><a href="{{ if eq .action "mode" }}javascript:void(0);{{ else }}{{ .Request.URL.Path }}?action=mode{{ end }}">{{ i18n "Mode" . }}</a></li>
                         </ul>
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane fade active in">
@@ -165,12 +157,61 @@
                                                 <td>{{ if .system_error }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
                                             </tr>
                                             {{ end }}
-                                        {{ else if eq .action "away" }}
-                                            
-                                        {{ else if eq .action "hold" }}
-                                            
-                                        {{ else if eq .action "fan" }}
-                                            
+                                        {{ else if eq .action "mode" }}
+                                            {{ if .device.IsSupportedFanSpeed }}
+                                            <tr>
+                                                <td>{{ i18n "Fan speed" . }}</td>
+                                                <td>{{ .fan_speed }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedTargetTemperature }}
+                                            <tr>
+                                                <td>{{ i18n "Target temperature" . }}</td>
+                                                <td>{{ .target_temperature }}{{ if .temperature_format }}°F{{ else }}°C{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedAway }}
+                                            <tr>
+                                                <td>{{ i18n "Away" . }}</td>
+                                                <td>{{ if .away }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedAwayTemperature }}
+                                            <tr>
+                                                <td>{{ i18n "Away temperature" . }}</td>
+                                                <td>{{ .away_temperature }}{{ if .temperature_format }}°F{{ else }}°C{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedHoldingTemperature }}
+                                            <tr>
+                                                <td>{{ i18n "Holding temperature" . }}</td>
+                                                <td>{{ .holding_temperature }}{{ if .temperature_format }}°F{{ else }}°C{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedBoost }}
+                                            <tr>
+                                                <td>{{ i18n "Boost" . }}</td>
+                                                <td>{{ if .boost }}{{ i18n "on" . }}{{ else }}{{ i18n "off" . }}{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedTargetTemperatureMaximum }}
+                                            <tr>
+                                                <td>{{ i18n "Target temperature maximum" . }}</td>
+                                                <td>{{ .target_temperature_max }}{{ if .temperature_format }}°F{{ else }}°C{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedTargetTemperatureMinimum }}
+                                            <tr>
+                                                <td>{{ i18n "Target temperature minimum" . }}</td>
+                                                <td>{{ .target_temperature_min }}{{ if .temperature_format }}°F{{ else }}°C{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ if .device.IsSupportedTargetTemperatureMinimum }}
+                                            <tr>
+                                                <td>{{ i18n "Floor temperature limit" . }}</td>
+                                                <td>{{ .floor_temperature_limit }}{{ if .temperature_format }}°F{{ else }}°C{{ end }}</td>
+                                            </tr>
+                                            {{ end }}
                                         {{ else }}
                                             <tr>
                                                 <td>{{ i18n "Device type" . }}</td>
