@@ -1,18 +1,20 @@
 package modbus
 
 import (
-	assetfs "github.com/elazarl/go-bindata-assetfs"
+	"strconv"
 
+	assetfs "github.com/elazarl/go-bindata-assetfs"
 	"github.com/kihamo/boggart/providers/mc6"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-func (b *Bind) WidgetHandler(_ *dashboard.Response, r *dashboard.Request) {
+func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	widget := b.Widget()
 	ctx := r.Context()
 	provider := b.Provider()
 
-	action := r.URL().Query().Get("action")
+	q := r.URL().Query()
+	action := q.Get("action")
 
 	deviceType, err := b.DeviceType(ctx)
 	if err != nil {
@@ -130,6 +132,45 @@ func (b *Bind) WidgetHandler(_ *dashboard.Response, r *dashboard.Request) {
 		}
 
 	case "mode":
+		cmd := q.Get("cmd")
+		switch cmd {
+		case "away_on", "away_off":
+			if !deviceType.IsSupportedAway() {
+				widget.NotFound(w, r)
+				return
+			}
+
+			action := "off"
+			if cmd == "away_on" {
+				action = "on"
+			}
+
+			if err := provider.SetAway(cmd == "away_on"); err != nil {
+				widget.FlashError(r, "Away turn %s failed with error %v", "", action, err)
+			} else {
+				widget.FlashSuccess(r, "Away turn %s success", "", action)
+			}
+
+		case "away_temperature":
+			if !deviceType.IsSupportedAwayTemperature() {
+				widget.NotFound(w, r)
+				return
+			}
+
+			if r.IsPost() {
+				value, err := strconv.ParseUint(r.Original().FormValue("temperature"), 10, 64)
+				if err == nil {
+					err = provider.SetAwayTemperature(uint16(value))
+				}
+
+				if err != nil {
+					widget.FlashError(r, "Set away temperature failed with error %v", "", err)
+				} else {
+					widget.FlashSuccess(r, "Set away temperature success", "")
+				}
+			}
+		}
+
 		if deviceType.IsSupported(mc6.AddressTemperatureFormat) {
 			if value, err := provider.TemperatureFormat(); err != nil {
 				widget.FlashError(r, "Get temperature format failed with error %v", "", err)
