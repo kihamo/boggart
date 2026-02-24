@@ -33,8 +33,14 @@ func (b *Bind) config() *Config {
 }
 
 func (b *Bind) Run() error {
+	cfg := b.config()
+
 	b.Meta().SetLink(link)
-	b.provider = mosoblgaz.New().WithToken(b.config().Token)
+	b.provider = mosoblgaz.New().WithToken(cfg.Token)
+
+	if cfg.Debug {
+		b.provider = b.provider.WithDebug(cfg.Debug)
+	}
 
 	return nil
 }

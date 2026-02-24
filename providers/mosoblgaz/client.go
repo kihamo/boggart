@@ -31,9 +31,16 @@ func (c *Client) WithToken(token string) *Client {
 	return c
 }
 
+func (c *Client) WithDebug(flag bool) *Client {
+	c.client = c.client.WithDebug(flag)
+
+	return c
+}
+
 func (c *Client) requestModifier(r *http.Request) {
 	if c.token != "" {
 		r.Header.Set("token", c.token)
+		r.Header.Set("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36")
 	}
 }
 

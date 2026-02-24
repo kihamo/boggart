@@ -12,6 +12,7 @@ type Config struct {
 	di.ProbesConfig `mapstructure:",squash" yaml:",inline"`
 	di.LoggerConfig `mapstructure:",squash" yaml:",inline"`
 
+	Debug        bool
 	Token        string     `valid:"required"`
 	TopicBalance mqtt.Topic `mapstructure:"topic_balance" yaml:"topic_balance"`
 }
