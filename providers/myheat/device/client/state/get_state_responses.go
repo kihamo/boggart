@@ -6,6 +6,8 @@ package state
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+	stderrors "errors"
 	"fmt"
 	"io"
 
@@ -21,7 +23,7 @@ type GetStateReader struct {
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *GetStateReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GetStateReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (any, error) {
 	switch response.Code() {
 	case 200:
 		result := NewGetStateOK()
@@ -30,7 +32,7 @@ func (o *GetStateReader) ReadResponse(response runtime.ClientResponse, consumer 
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /getState] getState", response, response.Code())
 	}
 }
 
@@ -40,7 +42,7 @@ func NewGetStateOK() *GetStateOK {
 }
 
 /*
-	GetStateOK describes a response with status code 200, with default header values.
+GetStateOK describes a response with status code 200, with default header values.
 
 Successful login
 */
@@ -48,9 +50,46 @@ type GetStateOK struct {
 	Payload *models.State
 }
 
-func (o *GetStateOK) Error() string {
-	return fmt.Sprintf("[GET /getState][%d] getStateOK  %+v", 200, o.Payload)
+// IsSuccess returns true when this get state o k response has a 2xx status code
+func (o *GetStateOK) IsSuccess() bool {
+	return true
 }
+
+// IsRedirect returns true when this get state o k response has a 3xx status code
+func (o *GetStateOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get state o k response has a 4xx status code
+func (o *GetStateOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get state o k response has a 5xx status code
+func (o *GetStateOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get state o k response a status code equal to that given
+func (o *GetStateOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get state o k response
+func (o *GetStateOK) Code() int {
+	return 200
+}
+
+func (o *GetStateOK) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /getState][%d] getStateOK %s", 200, payload)
+}
+
+func (o *GetStateOK) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /getState][%d] getStateOK %s", 200, payload)
+}
+
 func (o *GetStateOK) GetPayload() *models.State {
 	return o.Payload
 }
@@ -60,7 +99,7 @@ func (o *GetStateOK) readResponse(response runtime.ClientResponse, consumer runt
 	o.Payload = new(models.State)
 
 	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && !stderrors.Is(err, io.EOF) {
 		return err
 	}
 

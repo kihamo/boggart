@@ -30,7 +30,7 @@ type Device struct {
 	Settings map[string]string `json:"s,omitempty"`
 
 	// device severity level
-	// Enum: [1 32 64]
+	// Enum: [1,32,64]
 	SeverityLevel int64 `json:"sev,omitempty"`
 
 	// state
@@ -57,7 +57,7 @@ func (m *Device) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-var deviceTypeSeverityLevelPropEnum []interface{}
+var deviceTypeSeverityLevelPropEnum []any
 
 func init() {
 	var res []int64

@@ -24,7 +24,7 @@ type SetStateEngineeringRequest struct {
 	ID int64 `json:"id,omitempty"`
 
 	// target
-	// Enum: [eng]
+	// Enum: ["eng"]
 	Target string `json:"target,omitempty"`
 
 	// value
@@ -45,7 +45,7 @@ func (m *SetStateEngineeringRequest) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-var setStateEngineeringRequestTypeTargetPropEnum []interface{}
+var setStateEngineeringRequestTypeTargetPropEnum []any
 
 func init() {
 	var res []string

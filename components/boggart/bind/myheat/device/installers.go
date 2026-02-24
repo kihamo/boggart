@@ -26,12 +26,12 @@ func (b *Bind) InstallerSteps(ctx context.Context, _ installer.System) ([]instal
 		return nil, errors.New("serial number is empty")
 	}
 
-	sensorsResponse, err := b.client.Sensors.GetSensors(sensors.NewGetSensorsParamsWithContext(ctx), nil)
+	sensorsResponse, err := b.client.Sensors.GetSensors(sensors.NewGetSensorsParamsWithContext(ctx))
 	if err != nil {
 		return nil, err
 	}
 
-	stateObjResponse, err := b.client.State.GetObjState(state.NewGetObjStateParamsWithContext(ctx), nil)
+	stateObjResponse, err := b.client.State.GetObjState(state.NewGetObjStateParamsWithContext(ctx))
 	if err != nil {
 		return nil, err
 	}

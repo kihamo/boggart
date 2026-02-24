@@ -7,6 +7,7 @@ package models
 
 import (
 	"context"
+	stderrors "errors"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -102,11 +103,15 @@ func (m *StateObject) validateEngineeringEquipment(formats strfmt.Registry) erro
 
 		if m.EngineeringEquipment[i] != nil {
 			if err := m.EngineeringEquipment[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("engs" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("engs" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -128,11 +133,15 @@ func (m *StateObject) validateEnvironments(formats strfmt.Registry) error {
 
 		if m.Environments[i] != nil {
 			if err := m.Environments[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("envs" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("envs" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -154,11 +163,15 @@ func (m *StateObject) validateHeatModes(formats strfmt.Registry) error {
 
 		if m.HeatModes[i] != nil {
 			if err := m.HeatModes[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("hModes" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("hModes" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -180,11 +193,15 @@ func (m *StateObject) validateSchedules(formats strfmt.Registry) error {
 
 		if m.Schedules[i] != nil {
 			if err := m.Schedules[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("scheds" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("scheds" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -206,11 +223,15 @@ func (m *StateObject) validateAlarms(formats strfmt.Registry) error {
 
 		if m.Alarms[i] != nil {
 			if err := m.Alarms[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("alarms" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("alarms" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -232,11 +253,15 @@ func (m *StateObject) validateHeaters(formats strfmt.Registry) error {
 
 		if m.Heaters[i] != nil {
 			if err := m.Heaters[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("heaters" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("heaters" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -285,12 +310,21 @@ func (m *StateObject) contextValidateEngineeringEquipment(ctx context.Context, f
 	for i := 0; i < len(m.EngineeringEquipment); i++ {
 
 		if m.EngineeringEquipment[i] != nil {
+
+			if swag.IsZero(m.EngineeringEquipment[i]) { // not required
+				return nil
+			}
+
 			if err := m.EngineeringEquipment[i].ContextValidate(ctx, formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("engs" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("engs" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -305,12 +339,21 @@ func (m *StateObject) contextValidateEnvironments(ctx context.Context, formats s
 	for i := 0; i < len(m.Environments); i++ {
 
 		if m.Environments[i] != nil {
+
+			if swag.IsZero(m.Environments[i]) { // not required
+				return nil
+			}
+
 			if err := m.Environments[i].ContextValidate(ctx, formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("envs" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("envs" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -325,12 +368,21 @@ func (m *StateObject) contextValidateHeatModes(ctx context.Context, formats strf
 	for i := 0; i < len(m.HeatModes); i++ {
 
 		if m.HeatModes[i] != nil {
+
+			if swag.IsZero(m.HeatModes[i]) { // not required
+				return nil
+			}
+
 			if err := m.HeatModes[i].ContextValidate(ctx, formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("hModes" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("hModes" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -345,12 +397,21 @@ func (m *StateObject) contextValidateSchedules(ctx context.Context, formats strf
 	for i := 0; i < len(m.Schedules); i++ {
 
 		if m.Schedules[i] != nil {
+
+			if swag.IsZero(m.Schedules[i]) { // not required
+				return nil
+			}
+
 			if err := m.Schedules[i].ContextValidate(ctx, formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("scheds" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("scheds" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -365,12 +426,21 @@ func (m *StateObject) contextValidateAlarms(ctx context.Context, formats strfmt.
 	for i := 0; i < len(m.Alarms); i++ {
 
 		if m.Alarms[i] != nil {
+
+			if swag.IsZero(m.Alarms[i]) { // not required
+				return nil
+			}
+
 			if err := m.Alarms[i].ContextValidate(ctx, formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("alarms" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("alarms" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -385,12 +455,21 @@ func (m *StateObject) contextValidateHeaters(ctx context.Context, formats strfmt
 	for i := 0; i < len(m.Heaters); i++ {
 
 		if m.Heaters[i] != nil {
+
+			if swag.IsZero(m.Heaters[i]) { // not required
+				return nil
+			}
+
 			if err := m.Heaters[i].ContextValidate(ctx, formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("heaters" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("heaters" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}

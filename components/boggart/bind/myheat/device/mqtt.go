@@ -28,7 +28,7 @@ func (b *Bind) callbackMQTTSecurityArmed(ctx context.Context, _ mqtt.Component, 
 		params.Request.SetStateSecurityRequest.Action = "disarmSecurity"
 	}
 
-	_, err := b.client.State.SetObjState(params, nil)
+	_, err := b.client.State.SetObjState(params)
 
 	return err
 }

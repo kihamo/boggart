@@ -21,7 +21,7 @@ import (
 type SetStateHeatingModeRequest struct {
 
 	// action
-	// Enum: [setHeatingMode]
+	// Enum: ["setHeatingMode"]
 	Action string `json:"action,omitempty"`
 
 	// mode ID
@@ -45,7 +45,7 @@ func (m *SetStateHeatingModeRequest) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-var setStateHeatingModeRequestTypeActionPropEnum []interface{}
+var setStateHeatingModeRequestTypeActionPropEnum []any
 
 func init() {
 	var res []string

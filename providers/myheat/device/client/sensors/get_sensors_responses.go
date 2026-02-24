@@ -6,6 +6,8 @@ package sensors
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+	stderrors "errors"
 	"fmt"
 	"io"
 
@@ -21,7 +23,7 @@ type GetSensorsReader struct {
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *GetSensorsReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GetSensorsReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (any, error) {
 	switch response.Code() {
 	case 200:
 		result := NewGetSensorsOK()
@@ -30,7 +32,7 @@ func (o *GetSensorsReader) ReadResponse(response runtime.ClientResponse, consume
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /getSensors] getSensors", response, response.Code())
 	}
 }
 
@@ -40,7 +42,7 @@ func NewGetSensorsOK() *GetSensorsOK {
 }
 
 /*
-	GetSensorsOK describes a response with status code 200, with default header values.
+GetSensorsOK describes a response with status code 200, with default header values.
 
 Successful login
 */
@@ -48,9 +50,46 @@ type GetSensorsOK struct {
 	Payload models.Sensors
 }
 
-func (o *GetSensorsOK) Error() string {
-	return fmt.Sprintf("[GET /getSensors][%d] getSensorsOK  %+v", 200, o.Payload)
+// IsSuccess returns true when this get sensors o k response has a 2xx status code
+func (o *GetSensorsOK) IsSuccess() bool {
+	return true
 }
+
+// IsRedirect returns true when this get sensors o k response has a 3xx status code
+func (o *GetSensorsOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get sensors o k response has a 4xx status code
+func (o *GetSensorsOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get sensors o k response has a 5xx status code
+func (o *GetSensorsOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get sensors o k response a status code equal to that given
+func (o *GetSensorsOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get sensors o k response
+func (o *GetSensorsOK) Code() int {
+	return 200
+}
+
+func (o *GetSensorsOK) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /getSensors][%d] getSensorsOK %s", 200, payload)
+}
+
+func (o *GetSensorsOK) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /getSensors][%d] getSensorsOK %s", 200, payload)
+}
+
 func (o *GetSensorsOK) GetPayload() models.Sensors {
 	return o.Payload
 }
@@ -58,7 +97,7 @@ func (o *GetSensorsOK) GetPayload() models.Sensors {
 func (o *GetSensorsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && !stderrors.Is(err, io.EOF) {
 		return err
 	}
 

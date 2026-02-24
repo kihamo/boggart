@@ -10,6 +10,7 @@ import (
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 
+	"github.com/kihamo/boggart/providers/myheat/device/client/auth"
 	"github.com/kihamo/boggart/providers/myheat/device/client/sensors"
 	"github.com/kihamo/boggart/providers/myheat/device/client/state"
 )
@@ -56,6 +57,7 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *MyHeat {
 
 	cli := new(MyHeat)
 	cli.Transport = transport
+	cli.Auth = auth.New(transport, formats)
 	cli.Sensors = sensors.New(transport, formats)
 	cli.State = state.New(transport, formats)
 	return cli
@@ -102,6 +104,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // MyHeat is a client for my heat
 type MyHeat struct {
+	Auth auth.ClientService
+
 	Sensors sensors.ClientService
 
 	State state.ClientService
@@ -112,6 +116,7 @@ type MyHeat struct {
 // SetTransport changes the transport on the client and all its subresources
 func (c *MyHeat) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
+	c.Auth.SetTransport(transport)
 	c.Sensors.SetTransport(transport)
 	c.State.SetTransport(transport)
 }

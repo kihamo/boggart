@@ -7,11 +7,13 @@ package models
 
 import (
 	"context"
+	stderrors "errors"
+
+	extend "github.com/kihamo/boggart/protocols/swagger"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
-	extend "github.com/kihamo/boggart/protocols/swagger"
 )
 
 // State state
@@ -64,11 +66,15 @@ func (m *State) validateInet(formats strfmt.Registry) error {
 	}
 
 	if err := m.Inet.Validate(formats); err != nil {
-		if ve, ok := err.(*errors.Validation); ok {
+		ve := new(errors.Validation)
+		if stderrors.As(err, &ve) {
 			return ve.ValidateName("inet")
-		} else if ce, ok := err.(*errors.CompositeError); ok {
+		}
+		ce := new(errors.CompositeError)
+		if stderrors.As(err, &ce) {
 			return ce.ValidateName("inet")
 		}
+
 		return err
 	}
 
@@ -91,12 +97,20 @@ func (m *State) ContextValidate(ctx context.Context, formats strfmt.Registry) er
 
 func (m *State) contextValidateInet(ctx context.Context, formats strfmt.Registry) error {
 
+	if swag.IsZero(m.Inet) { // not required
+		return nil
+	}
+
 	if err := m.Inet.ContextValidate(ctx, formats); err != nil {
-		if ve, ok := err.(*errors.Validation); ok {
+		ve := new(errors.Validation)
+		if stderrors.As(err, &ve) {
 			return ve.ValidateName("inet")
-		} else if ce, ok := err.(*errors.CompositeError); ok {
+		}
+		ce := new(errors.CompositeError)
+		if stderrors.As(err, &ce) {
 			return ce.ValidateName("inet")
 		}
+
 		return err
 	}
 

@@ -7,7 +7,7 @@ import (
 )
 
 func (b *Bind) ReadinessProbe(ctx context.Context) error {
-	_, err := b.client.State.GetState(state.NewGetStateParamsWithContext(ctx), nil)
+	_, err := b.client.State.GetState(state.NewGetStateParamsWithContext(ctx))
 
 	return err
 }

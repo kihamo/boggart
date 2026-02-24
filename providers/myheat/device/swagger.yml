@@ -11,12 +11,23 @@ produces:
 schemes:
 - "http"
 basePath: "/api"
-securityDefinitions:
-  basicAuth:
-    type: "basic"
-security:
-  - basicAuth: []
 paths:
+  /login:
+    post:
+      operationId: "login"
+      tags:
+      - "auth"
+      summary: "Authorization by login and password"
+      parameters:
+        - name: "request"
+          in: "body"
+          schema:
+            $ref: "#/definitions/LoginRequest"
+      responses:
+        200:
+          description: "Successful login"
+          schema:
+            $ref: "#/definitions/StatusBool"
   /getState:
     get:
       operationId: "getState"
@@ -106,6 +117,16 @@ definitions:
         x-go-name: "Name"
         type: "string"
         description: "name"
+  LoginRequest:
+    type: "object"
+    properties:
+      login:
+        type: "string"
+        description: "login"
+      pswd:
+        x-go-name: "Password"
+        type: "string"
+        description: "password"
   Device:
     type: "object"
     properties:
@@ -247,6 +268,11 @@ definitions:
         type: "integer"
         # 1 - ok
         # other - not ok
+  StatusBool:
+    type: "object"
+    properties:
+      status:
+        type: "boolean"
   SetStateSecurityRequest:
     type: "object"
     properties:

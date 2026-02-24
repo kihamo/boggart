@@ -27,7 +27,7 @@ type SetStateEnvironmentRequest struct {
 	ID int64 `json:"id,omitempty"`
 
 	// target
-	// Enum: [env]
+	// Enum: ["env"]
 	Target string `json:"target,omitempty"`
 
 	// value
@@ -48,7 +48,7 @@ func (m *SetStateEnvironmentRequest) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-var setStateEnvironmentRequestTypeTargetPropEnum []interface{}
+var setStateEnvironmentRequestTypeTargetPropEnum []any
 
 func init() {
 	var res []string

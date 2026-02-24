@@ -40,7 +40,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	sn := b.Meta().SerialNumber()
 
 	// устройство
-	deviceResponse, e := b.client.State.GetState(state.NewGetStateParamsWithContext(ctx), nil)
+	deviceResponse, e := b.client.State.GetState(state.NewGetStateParamsWithContext(ctx))
 	if e == nil {
 		if sn == "" && deviceResponse.Payload.Serial != "" {
 			b.Meta().SetSerialNumber(deviceResponse.Payload.Serial)
@@ -55,7 +55,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	}
 
 	// сенсоры
-	sensorsResponse, e := b.client.Sensors.GetSensors(sensors.NewGetSensorsParamsWithContext(ctx), nil)
+	sensorsResponse, e := b.client.Sensors.GetSensors(sensors.NewGetSensorsParamsWithContext(ctx))
 	if e == nil {
 		for _, sensor := range sensorsResponse.Payload {
 			metricSensorValue.With("serial_number", sn).With("id", strconv.FormatInt(sensor.ID, 10)).Set(sensor.Value)
@@ -69,7 +69,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 	}
 
 	// основные статусы
-	stateObjResponse, e := b.client.State.GetObjState(state.NewGetObjStateParamsWithContext(ctx), nil)
+	stateObjResponse, e := b.client.State.GetObjState(state.NewGetObjStateParamsWithContext(ctx))
 	if e == nil {
 		// heaters
 		for _, heater := range stateObjResponse.Payload.Heaters {

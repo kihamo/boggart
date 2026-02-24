@@ -21,7 +21,7 @@ import (
 type SetStateSecurityRequest struct {
 
 	// action
-	// Enum: [armSecurity disarmSecurity]
+	// Enum: ["armSecurity","disarmSecurity"]
 	Action string `json:"action,omitempty"`
 }
 
@@ -39,7 +39,7 @@ func (m *SetStateSecurityRequest) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-var setStateSecurityRequestTypeActionPropEnum []interface{}
+var setStateSecurityRequestTypeActionPropEnum []any
 
 func init() {
 	var res []string

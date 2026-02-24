@@ -7,6 +7,8 @@ package state
 
 import (
 	"context"
+	"encoding/json"
+	stderrors "errors"
 	"fmt"
 	"io"
 
@@ -24,7 +26,7 @@ type SetObjStateReader struct {
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *SetObjStateReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *SetObjStateReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (any, error) {
 	switch response.Code() {
 	case 200:
 		result := NewSetObjStateOK()
@@ -33,7 +35,7 @@ func (o *SetObjStateReader) ReadResponse(response runtime.ClientResponse, consum
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[POST /setObjState] setObjState", response, response.Code())
 	}
 }
 
@@ -43,7 +45,7 @@ func NewSetObjStateOK() *SetObjStateOK {
 }
 
 /*
-	SetObjStateOK describes a response with status code 200, with default header values.
+SetObjStateOK describes a response with status code 200, with default header values.
 
 Successful login
 */
@@ -51,9 +53,46 @@ type SetObjStateOK struct {
 	Payload *models.Status
 }
 
-func (o *SetObjStateOK) Error() string {
-	return fmt.Sprintf("[POST /setObjState][%d] setObjStateOK  %+v", 200, o.Payload)
+// IsSuccess returns true when this set obj state o k response has a 2xx status code
+func (o *SetObjStateOK) IsSuccess() bool {
+	return true
 }
+
+// IsRedirect returns true when this set obj state o k response has a 3xx status code
+func (o *SetObjStateOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this set obj state o k response has a 4xx status code
+func (o *SetObjStateOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this set obj state o k response has a 5xx status code
+func (o *SetObjStateOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this set obj state o k response a status code equal to that given
+func (o *SetObjStateOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the set obj state o k response
+func (o *SetObjStateOK) Code() int {
+	return 200
+}
+
+func (o *SetObjStateOK) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /setObjState][%d] setObjStateOK %s", 200, payload)
+}
+
+func (o *SetObjStateOK) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /setObjState][%d] setObjStateOK %s", 200, payload)
+}
+
 func (o *SetObjStateOK) GetPayload() *models.Status {
 	return o.Payload
 }
@@ -63,7 +102,7 @@ func (o *SetObjStateOK) readResponse(response runtime.ClientResponse, consumer r
 	o.Payload = new(models.Status)
 
 	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && !stderrors.Is(err, io.EOF) {
 		return err
 	}
 
