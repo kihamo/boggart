@@ -82,7 +82,7 @@ func (b *Bind) taskUpdaterHandler(ctx context.Context) (err error) {
 
 			metricEnvironmentStateTemperatureCelsius.With("device", deviceIdAsString, "id", idAsString).Set(env.Value)
 			// TODO: сделать корректную обработку null значения (когда контур отключен)
-			metricEnvironmentTargetTemperatureCelsius.With("device", deviceIdAsString, "id", idAsString).Set(float64(env.Target))
+			metricEnvironmentTargetTemperatureCelsius.With("device", deviceIdAsString, "id", idAsString).Set(env.Target)
 		}
 	}
 

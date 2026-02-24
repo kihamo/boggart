@@ -7,12 +7,38 @@ package operations
 
 import (
 	"github.com/go-openapi/runtime"
+	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new operations API client.
 func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
+}
+
+// New creates a new operations API client with basic auth credentials.
+// It takes the following parameters:
+// - host: http host (github.com).
+// - basePath: any base path for the API client ("/v1", "/v3").
+// - scheme: http scheme ("http", "https").
+// - user: user for basic authentication header.
+// - password: password for basic authentication header.
+func NewClientWithBasicAuth(host, basePath, scheme, user, password string) ClientService {
+	transport := httptransport.New(host, basePath, []string{scheme})
+	transport.DefaultAuthentication = httptransport.BasicAuth(user, password)
+	return &Client{transport: transport, formats: strfmt.Default}
+}
+
+// New creates a new operations API client with a bearer token for authentication.
+// It takes the following parameters:
+// - host: http host (github.com).
+// - basePath: any base path for the API client ("/v1", "/v3").
+// - scheme: http scheme ("http", "https").
+// - bearerToken: bearer token for Bearer authentication header.
+func NewClientWithBearerToken(host, basePath, scheme, bearerToken string) ClientService {
+	transport := httptransport.New(host, basePath, []string{scheme})
+	transport.DefaultAuthentication = httptransport.BearerToken(bearerToken)
+	return &Client{transport: transport, formats: strfmt.Default}
 }
 
 /*
@@ -23,7 +49,7 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
-// ClientOption is the option for Client methods
+// ClientOption may be used to customize the behavior of Client methods.
 type ClientOption func(*runtime.ClientOperation)
 
 // ClientService is the interface for Client methods
@@ -49,7 +75,7 @@ type ClientService interface {
 GetDeviceInfo запросs состояния контроллера и его объектов
 */
 func (a *Client) GetDeviceInfo(params *GetDeviceInfoParams, opts ...ClientOption) (*GetDeviceInfoOK, error) {
-	// TODO: Validate the params before sending
+	// NOTE: parameters are not validated before sending
 	if params == nil {
 		params = NewGetDeviceInfoParams()
 	}
@@ -68,17 +94,22 @@ func (a *Client) GetDeviceInfo(params *GetDeviceInfoParams, opts ...ClientOption
 	for _, opt := range opts {
 		opt(op)
 	}
-
 	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
+
+	// only one success response has to be checked
 	success, ok := result.(*GetDeviceInfoOK)
 	if ok {
 		return success, nil
 	}
-	// unexpected success response
+
+	// unexpected success response.
+	//
+	// a default response is provided: fill this and return an error
 	unexpectedSuccess := result.(*GetDeviceInfoDefault)
+
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -86,7 +117,7 @@ func (a *Client) GetDeviceInfo(params *GetDeviceInfoParams, opts ...ClientOption
 GetDevices запросs списка контроллеров подключенных к вашему аккаунту
 */
 func (a *Client) GetDevices(params *GetDevicesParams, opts ...ClientOption) (*GetDevicesOK, error) {
-	// TODO: Validate the params before sending
+	// NOTE: parameters are not validated before sending
 	if params == nil {
 		params = NewGetDevicesParams()
 	}
@@ -105,17 +136,22 @@ func (a *Client) GetDevices(params *GetDevicesParams, opts ...ClientOption) (*Ge
 	for _, opt := range opts {
 		opt(op)
 	}
-
 	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
+
+	// only one success response has to be checked
 	success, ok := result.(*GetDevicesOK)
 	if ok {
 		return success, nil
 	}
-	// unexpected success response
+
+	// unexpected success response.
+	//
+	// a default response is provided: fill this and return an error
 	unexpectedSuccess := result.(*GetDevicesDefault)
+
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -123,7 +159,7 @@ func (a *Client) GetDevices(params *GetDevicesParams, opts ...ClientOption) (*Ge
 SetEngGoal установкаs режима работы инженерного оборудования
 */
 func (a *Client) SetEngGoal(params *SetEngGoalParams, opts ...ClientOption) (*SetEngGoalOK, error) {
-	// TODO: Validate the params before sending
+	// NOTE: parameters are not validated before sending
 	if params == nil {
 		params = NewSetEngGoalParams()
 	}
@@ -142,17 +178,22 @@ func (a *Client) SetEngGoal(params *SetEngGoalParams, opts ...ClientOption) (*Se
 	for _, opt := range opts {
 		opt(op)
 	}
-
 	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
+
+	// only one success response has to be checked
 	success, ok := result.(*SetEngGoalOK)
 	if ok {
 		return success, nil
 	}
-	// unexpected success response
+
+	// unexpected success response.
+	//
+	// a default response is provided: fill this and return an error
 	unexpectedSuccess := result.(*SetEngGoalDefault)
+
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -160,7 +201,7 @@ func (a *Client) SetEngGoal(params *SetEngGoalParams, opts ...ClientOption) (*Se
 SetEnvCurve установкаs погодозависимой кривой пза для среды контуры смесительный узел
 */
 func (a *Client) SetEnvCurve(params *SetEnvCurveParams, opts ...ClientOption) (*SetEnvCurveOK, error) {
-	// TODO: Validate the params before sending
+	// NOTE: parameters are not validated before sending
 	if params == nil {
 		params = NewSetEnvCurveParams()
 	}
@@ -179,17 +220,22 @@ func (a *Client) SetEnvCurve(params *SetEnvCurveParams, opts ...ClientOption) (*
 	for _, opt := range opts {
 		opt(op)
 	}
-
 	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
+
+	// only one success response has to be checked
 	success, ok := result.(*SetEnvCurveOK)
 	if ok {
 		return success, nil
 	}
-	// unexpected success response
+
+	// unexpected success response.
+	//
+	// a default response is provided: fill this and return an error
 	unexpectedSuccess := result.(*SetEnvCurveDefault)
+
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -197,7 +243,7 @@ func (a *Client) SetEnvCurve(params *SetEnvCurveParams, opts ...ClientOption) (*
 SetEnvGoal установкаs целевого значения для среды помещение контур и т д
 */
 func (a *Client) SetEnvGoal(params *SetEnvGoalParams, opts ...ClientOption) (*SetEnvGoalOK, error) {
-	// TODO: Validate the params before sending
+	// NOTE: parameters are not validated before sending
 	if params == nil {
 		params = NewSetEnvGoalParams()
 	}
@@ -216,17 +262,22 @@ func (a *Client) SetEnvGoal(params *SetEnvGoalParams, opts ...ClientOption) (*Se
 	for _, opt := range opts {
 		opt(op)
 	}
-
 	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
+
+	// only one success response has to be checked
 	success, ok := result.(*SetEnvGoalOK)
 	if ok {
 		return success, nil
 	}
-	// unexpected success response
+
+	// unexpected success response.
+	//
+	// a default response is provided: fill this and return an error
 	unexpectedSuccess := result.(*SetEnvGoalDefault)
+
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -234,7 +285,7 @@ func (a *Client) SetEnvGoal(params *SetEnvGoalParams, opts ...ClientOption) (*Se
 SetHeatingMode установкаs режима отопления или расписания
 */
 func (a *Client) SetHeatingMode(params *SetHeatingModeParams, opts ...ClientOption) (*SetHeatingModeOK, error) {
-	// TODO: Validate the params before sending
+	// NOTE: parameters are not validated before sending
 	if params == nil {
 		params = NewSetHeatingModeParams()
 	}
@@ -253,17 +304,22 @@ func (a *Client) SetHeatingMode(params *SetHeatingModeParams, opts ...ClientOpti
 	for _, opt := range opts {
 		opt(op)
 	}
-
 	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
+
+	// only one success response has to be checked
 	success, ok := result.(*SetHeatingModeOK)
 	if ok {
 		return success, nil
 	}
-	// unexpected success response
+
+	// unexpected success response.
+	//
+	// a default response is provided: fill this and return an error
 	unexpectedSuccess := result.(*SetHeatingModeDefault)
+
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -271,7 +327,7 @@ func (a *Client) SetHeatingMode(params *SetHeatingModeParams, opts ...ClientOpti
 SetSecurityMode снятиеs с охраны постановка на охрану
 */
 func (a *Client) SetSecurityMode(params *SetSecurityModeParams, opts ...ClientOption) (*SetSecurityModeOK, error) {
-	// TODO: Validate the params before sending
+	// NOTE: parameters are not validated before sending
 	if params == nil {
 		params = NewSetSecurityModeParams()
 	}
@@ -290,17 +346,22 @@ func (a *Client) SetSecurityMode(params *SetSecurityModeParams, opts ...ClientOp
 	for _, opt := range opts {
 		opt(op)
 	}
-
 	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
+
+	// only one success response has to be checked
 	success, ok := result.(*SetSecurityModeOK)
 	if ok {
 		return success, nil
 	}
-	// unexpected success response
+
+	// unexpected success response.
+	//
+	// a default response is provided: fill this and return an error
 	unexpectedSuccess := result.(*SetSecurityModeDefault)
+
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

@@ -7,6 +7,8 @@ package operations
 
 import (
 	"context"
+	"encoding/json"
+	stderrors "errors"
 	"fmt"
 	"io"
 
@@ -25,7 +27,7 @@ type GetDeviceInfoReader struct {
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *GetDeviceInfoReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GetDeviceInfoReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (any, error) {
 	switch response.Code() {
 	case 200:
 		result := NewGetDeviceInfoOK()
@@ -90,11 +92,13 @@ func (o *GetDeviceInfoOK) Code() int {
 }
 
 func (o *GetDeviceInfoOK) Error() string {
-	return fmt.Sprintf("[POST /request/?getDeviceInfo][%d] getDeviceInfoOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?getDeviceInfo][%d] getDeviceInfoOK %s", 200, payload)
 }
 
 func (o *GetDeviceInfoOK) String() string {
-	return fmt.Sprintf("[POST /request/?getDeviceInfo][%d] getDeviceInfoOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?getDeviceInfo][%d] getDeviceInfoOK %s", 200, payload)
 }
 
 func (o *GetDeviceInfoOK) GetPayload() *GetDeviceInfoOKBody {
@@ -106,7 +110,7 @@ func (o *GetDeviceInfoOK) readResponse(response runtime.ClientResponse, consumer
 	o.Payload = new(GetDeviceInfoOKBody)
 
 	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && !stderrors.Is(err, io.EOF) {
 		return err
 	}
 
@@ -162,11 +166,13 @@ func (o *GetDeviceInfoDefault) Code() int {
 }
 
 func (o *GetDeviceInfoDefault) Error() string {
-	return fmt.Sprintf("[POST /request/?getDeviceInfo][%d] getDeviceInfo default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?getDeviceInfo][%d] getDeviceInfo default %s", o._statusCode, payload)
 }
 
 func (o *GetDeviceInfoDefault) String() string {
-	return fmt.Sprintf("[POST /request/?getDeviceInfo][%d] getDeviceInfo default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?getDeviceInfo][%d] getDeviceInfo default %s", o._statusCode, payload)
 }
 
 func (o *GetDeviceInfoDefault) GetPayload() *models.Error {
@@ -178,7 +184,7 @@ func (o *GetDeviceInfoDefault) readResponse(response runtime.ClientResponse, con
 	o.Payload = new(models.Error)
 
 	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && !stderrors.Is(err, io.EOF) {
 		return err
 	}
 
@@ -212,7 +218,7 @@ func (o *GetDeviceInfoBody) Validate(formats strfmt.Registry) error {
 
 func (o *GetDeviceInfoBody) validateDeviceID(formats strfmt.Registry) error {
 
-	if err := validate.Required("request"+"."+"deviceId", "body", int64(o.DeviceID)); err != nil {
+	if err := validate.Required("request"+"."+"deviceId", "body", o.DeviceID); err != nil {
 		return err
 	}
 
@@ -279,11 +285,15 @@ func (o *GetDeviceInfoOKBody) validateData(formats strfmt.Registry) error {
 
 	if o.Data != nil {
 		if err := o.Data.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
+			ve := new(errors.Validation)
+			if stderrors.As(err, &ve) {
 				return ve.ValidateName("getDeviceInfoOK" + "." + "data")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
+			}
+			ce := new(errors.CompositeError)
+			if stderrors.As(err, &ce) {
 				return ce.ValidateName("getDeviceInfoOK" + "." + "data")
 			}
+
 			return err
 		}
 	}
@@ -314,11 +324,15 @@ func (o *GetDeviceInfoOKBody) contextValidateData(ctx context.Context, formats s
 		}
 
 		if err := o.Data.ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
+			ve := new(errors.Validation)
+			if stderrors.As(err, &ve) {
 				return ve.ValidateName("getDeviceInfoOK" + "." + "data")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
+			}
+			ce := new(errors.CompositeError)
+			if stderrors.As(err, &ce) {
 				return ce.ValidateName("getDeviceInfoOK" + "." + "data")
 			}
+
 			return err
 		}
 	}

@@ -8,6 +8,7 @@ package operations
 import (
 	"context"
 	"encoding/json"
+	stderrors "errors"
 	"fmt"
 	"io"
 
@@ -26,7 +27,7 @@ type SetEnvCurveReader struct {
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *SetEnvCurveReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *SetEnvCurveReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (any, error) {
 	switch response.Code() {
 	case 200:
 		result := NewSetEnvCurveOK()
@@ -91,11 +92,13 @@ func (o *SetEnvCurveOK) Code() int {
 }
 
 func (o *SetEnvCurveOK) Error() string {
-	return fmt.Sprintf("[POST /request/?setEnvCurve][%d] setEnvCurveOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?setEnvCurve][%d] setEnvCurveOK %s", 200, payload)
 }
 
 func (o *SetEnvCurveOK) String() string {
-	return fmt.Sprintf("[POST /request/?setEnvCurve][%d] setEnvCurveOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?setEnvCurve][%d] setEnvCurveOK %s", 200, payload)
 }
 
 func (o *SetEnvCurveOK) GetPayload() *models.Error {
@@ -107,7 +110,7 @@ func (o *SetEnvCurveOK) readResponse(response runtime.ClientResponse, consumer r
 	o.Payload = new(models.Error)
 
 	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && !stderrors.Is(err, io.EOF) {
 		return err
 	}
 
@@ -163,11 +166,13 @@ func (o *SetEnvCurveDefault) Code() int {
 }
 
 func (o *SetEnvCurveDefault) Error() string {
-	return fmt.Sprintf("[POST /request/?setEnvCurve][%d] setEnvCurve default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?setEnvCurve][%d] setEnvCurve default %s", o._statusCode, payload)
 }
 
 func (o *SetEnvCurveDefault) String() string {
-	return fmt.Sprintf("[POST /request/?setEnvCurve][%d] setEnvCurve default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?setEnvCurve][%d] setEnvCurve default %s", o._statusCode, payload)
 }
 
 func (o *SetEnvCurveDefault) GetPayload() *models.Error {
@@ -179,7 +184,7 @@ func (o *SetEnvCurveDefault) readResponse(response runtime.ClientResponse, consu
 	o.Payload = new(models.Error)
 
 	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && !stderrors.Is(err, io.EOF) {
 		return err
 	}
 
@@ -193,7 +198,7 @@ swagger:model SetEnvCurveBody
 type SetEnvCurveBody struct {
 
 	// Возможные значения: a. 0 – если в данный момент активен режим отопления, то режим будет сброшен. Система перейдет в состояние «Режим не выбран». b. значение не указано – аналогично значению «0». c. 1 – если в данный момент активен режим отопления, то в данный режим будут внесены соответствующие изменения (то есть – будет изменено целевое значение среды).
-	// Enum: [0 1]
+	// Enum: [0,1]
 	ChangeMode int64 `json:"changeMode,omitempty"`
 
 	// Идентификатор погодозависимой кривой (если значение не указано, либо при указании значения 0 и меньших значений, цель и погодозависимая кривая у среды сбрасывается)
@@ -230,7 +235,7 @@ func (o *SetEnvCurveBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-var setEnvCurveBodyTypeChangeModePropEnum []interface{}
+var setEnvCurveBodyTypeChangeModePropEnum []any
 
 func init() {
 	var res []int64
@@ -265,7 +270,7 @@ func (o *SetEnvCurveBody) validateChangeMode(formats strfmt.Registry) error {
 
 func (o *SetEnvCurveBody) validateDeviceID(formats strfmt.Registry) error {
 
-	if err := validate.Required("request"+"."+"deviceId", "body", int64(o.DeviceID)); err != nil {
+	if err := validate.Required("request"+"."+"deviceId", "body", o.DeviceID); err != nil {
 		return err
 	}
 
@@ -274,7 +279,7 @@ func (o *SetEnvCurveBody) validateDeviceID(formats strfmt.Registry) error {
 
 func (o *SetEnvCurveBody) validateObjID(formats strfmt.Registry) error {
 
-	if err := validate.Required("request"+"."+"objId", "body", int64(o.ObjID)); err != nil {
+	if err := validate.Required("request"+"."+"objId", "body", o.ObjID); err != nil {
 		return err
 	}
 

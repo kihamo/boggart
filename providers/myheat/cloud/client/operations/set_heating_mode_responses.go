@@ -7,6 +7,8 @@ package operations
 
 import (
 	"context"
+	"encoding/json"
+	stderrors "errors"
 	"fmt"
 	"io"
 
@@ -25,7 +27,7 @@ type SetHeatingModeReader struct {
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *SetHeatingModeReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *SetHeatingModeReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (any, error) {
 	switch response.Code() {
 	case 200:
 		result := NewSetHeatingModeOK()
@@ -90,11 +92,13 @@ func (o *SetHeatingModeOK) Code() int {
 }
 
 func (o *SetHeatingModeOK) Error() string {
-	return fmt.Sprintf("[POST /request/?setHeatingMode][%d] setHeatingModeOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?setHeatingMode][%d] setHeatingModeOK %s", 200, payload)
 }
 
 func (o *SetHeatingModeOK) String() string {
-	return fmt.Sprintf("[POST /request/?setHeatingMode][%d] setHeatingModeOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?setHeatingMode][%d] setHeatingModeOK %s", 200, payload)
 }
 
 func (o *SetHeatingModeOK) GetPayload() *models.Error {
@@ -106,7 +110,7 @@ func (o *SetHeatingModeOK) readResponse(response runtime.ClientResponse, consume
 	o.Payload = new(models.Error)
 
 	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && !stderrors.Is(err, io.EOF) {
 		return err
 	}
 
@@ -162,11 +166,13 @@ func (o *SetHeatingModeDefault) Code() int {
 }
 
 func (o *SetHeatingModeDefault) Error() string {
-	return fmt.Sprintf("[POST /request/?setHeatingMode][%d] setHeatingMode default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?setHeatingMode][%d] setHeatingMode default %s", o._statusCode, payload)
 }
 
 func (o *SetHeatingModeDefault) String() string {
-	return fmt.Sprintf("[POST /request/?setHeatingMode][%d] setHeatingMode default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?setHeatingMode][%d] setHeatingMode default %s", o._statusCode, payload)
 }
 
 func (o *SetHeatingModeDefault) GetPayload() *models.Error {
@@ -178,7 +184,7 @@ func (o *SetHeatingModeDefault) readResponse(response runtime.ClientResponse, co
 	o.Payload = new(models.Error)
 
 	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && !stderrors.Is(err, io.EOF) {
 		return err
 	}
 
@@ -226,7 +232,7 @@ func (o *SetHeatingModeBody) Validate(formats strfmt.Registry) error {
 
 func (o *SetHeatingModeBody) validateDeviceID(formats strfmt.Registry) error {
 
-	if err := validate.Required("request"+"."+"deviceId", "body", int64(o.DeviceID)); err != nil {
+	if err := validate.Required("request"+"."+"deviceId", "body", o.DeviceID); err != nil {
 		return err
 	}
 
@@ -235,7 +241,7 @@ func (o *SetHeatingModeBody) validateDeviceID(formats strfmt.Registry) error {
 
 func (o *SetHeatingModeBody) validateObjID(formats strfmt.Registry) error {
 
-	if err := validate.Required("request"+"."+"objId", "body", int64(o.ObjID)); err != nil {
+	if err := validate.Required("request"+"."+"objId", "body", o.ObjID); err != nil {
 		return err
 	}
 

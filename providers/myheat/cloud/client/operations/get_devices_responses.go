@@ -7,6 +7,8 @@ package operations
 
 import (
 	"context"
+	"encoding/json"
+	stderrors "errors"
 	"fmt"
 	"io"
 
@@ -24,7 +26,7 @@ type GetDevicesReader struct {
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *GetDevicesReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GetDevicesReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (any, error) {
 	switch response.Code() {
 	case 200:
 		result := NewGetDevicesOK()
@@ -89,11 +91,13 @@ func (o *GetDevicesOK) Code() int {
 }
 
 func (o *GetDevicesOK) Error() string {
-	return fmt.Sprintf("[POST /request/?getDevices][%d] getDevicesOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?getDevices][%d] getDevicesOK %s", 200, payload)
 }
 
 func (o *GetDevicesOK) String() string {
-	return fmt.Sprintf("[POST /request/?getDevices][%d] getDevicesOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?getDevices][%d] getDevicesOK %s", 200, payload)
 }
 
 func (o *GetDevicesOK) GetPayload() *GetDevicesOKBody {
@@ -105,7 +109,7 @@ func (o *GetDevicesOK) readResponse(response runtime.ClientResponse, consumer ru
 	o.Payload = new(GetDevicesOKBody)
 
 	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && !stderrors.Is(err, io.EOF) {
 		return err
 	}
 
@@ -161,11 +165,13 @@ func (o *GetDevicesDefault) Code() int {
 }
 
 func (o *GetDevicesDefault) Error() string {
-	return fmt.Sprintf("[POST /request/?getDevices][%d] getDevices default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?getDevices][%d] getDevices default %s", o._statusCode, payload)
 }
 
 func (o *GetDevicesDefault) String() string {
-	return fmt.Sprintf("[POST /request/?getDevices][%d] getDevices default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?getDevices][%d] getDevices default %s", o._statusCode, payload)
 }
 
 func (o *GetDevicesDefault) GetPayload() *models.Error {
@@ -177,7 +183,7 @@ func (o *GetDevicesDefault) readResponse(response runtime.ClientResponse, consum
 	o.Payload = new(models.Error)
 
 	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && !stderrors.Is(err, io.EOF) {
 		return err
 	}
 
@@ -221,11 +227,15 @@ func (o *GetDevicesOKBody) validateData(formats strfmt.Registry) error {
 
 	if o.Data != nil {
 		if err := o.Data.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
+			ve := new(errors.Validation)
+			if stderrors.As(err, &ve) {
 				return ve.ValidateName("getDevicesOK" + "." + "data")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
+			}
+			ce := new(errors.CompositeError)
+			if stderrors.As(err, &ce) {
 				return ce.ValidateName("getDevicesOK" + "." + "data")
 			}
+
 			return err
 		}
 	}
@@ -256,11 +266,15 @@ func (o *GetDevicesOKBody) contextValidateData(ctx context.Context, formats strf
 		}
 
 		if err := o.Data.ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
+			ve := new(errors.Validation)
+			if stderrors.As(err, &ve) {
 				return ve.ValidateName("getDevicesOK" + "." + "data")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
+			}
+			ce := new(errors.CompositeError)
+			if stderrors.As(err, &ce) {
 				return ce.ValidateName("getDevicesOK" + "." + "data")
 			}
+
 			return err
 		}
 	}

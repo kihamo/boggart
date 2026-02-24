@@ -8,6 +8,7 @@ package operations
 import (
 	"context"
 	"encoding/json"
+	stderrors "errors"
 	"fmt"
 	"io"
 
@@ -26,7 +27,7 @@ type SetSecurityModeReader struct {
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *SetSecurityModeReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *SetSecurityModeReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (any, error) {
 	switch response.Code() {
 	case 200:
 		result := NewSetSecurityModeOK()
@@ -91,11 +92,13 @@ func (o *SetSecurityModeOK) Code() int {
 }
 
 func (o *SetSecurityModeOK) Error() string {
-	return fmt.Sprintf("[POST /request/?setSecurityMode][%d] setSecurityModeOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?setSecurityMode][%d] setSecurityModeOK %s", 200, payload)
 }
 
 func (o *SetSecurityModeOK) String() string {
-	return fmt.Sprintf("[POST /request/?setSecurityMode][%d] setSecurityModeOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?setSecurityMode][%d] setSecurityModeOK %s", 200, payload)
 }
 
 func (o *SetSecurityModeOK) GetPayload() *models.Error {
@@ -107,7 +110,7 @@ func (o *SetSecurityModeOK) readResponse(response runtime.ClientResponse, consum
 	o.Payload = new(models.Error)
 
 	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && !stderrors.Is(err, io.EOF) {
 		return err
 	}
 
@@ -163,11 +166,13 @@ func (o *SetSecurityModeDefault) Code() int {
 }
 
 func (o *SetSecurityModeDefault) Error() string {
-	return fmt.Sprintf("[POST /request/?setSecurityMode][%d] setSecurityMode default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?setSecurityMode][%d] setSecurityMode default %s", o._statusCode, payload)
 }
 
 func (o *SetSecurityModeDefault) String() string {
-	return fmt.Sprintf("[POST /request/?setSecurityMode][%d] setSecurityMode default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /request/?setSecurityMode][%d] setSecurityMode default %s", o._statusCode, payload)
 }
 
 func (o *SetSecurityModeDefault) GetPayload() *models.Error {
@@ -179,7 +184,7 @@ func (o *SetSecurityModeDefault) readResponse(response runtime.ClientResponse, c
 	o.Payload = new(models.Error)
 
 	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && !stderrors.Is(err, io.EOF) {
 		return err
 	}
 
@@ -197,7 +202,7 @@ type SetSecurityModeBody struct {
 	DeviceID int64 `json:"deviceId"`
 
 	// возможные значения: a. 0 – снять с охраны b. 1 – поставить на охрану
-	// Enum: [0 1]
+	// Enum: [0,1]
 	Model int64 `json:"model,omitempty"`
 
 	// Идентификатор инженерного оборудования
@@ -229,14 +234,14 @@ func (o *SetSecurityModeBody) Validate(formats strfmt.Registry) error {
 
 func (o *SetSecurityModeBody) validateDeviceID(formats strfmt.Registry) error {
 
-	if err := validate.Required("request"+"."+"deviceId", "body", int64(o.DeviceID)); err != nil {
+	if err := validate.Required("request"+"."+"deviceId", "body", o.DeviceID); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-var setSecurityModeBodyTypeModelPropEnum []interface{}
+var setSecurityModeBodyTypeModelPropEnum []any
 
 func init() {
 	var res []int64
@@ -271,7 +276,7 @@ func (o *SetSecurityModeBody) validateModel(formats strfmt.Registry) error {
 
 func (o *SetSecurityModeBody) validateObjID(formats strfmt.Registry) error {
 
-	if err := validate.Required("request"+"."+"objId", "body", int64(o.ObjID)); err != nil {
+	if err := validate.Required("request"+"."+"objId", "body", o.ObjID); err != nil {
 		return err
 	}
 

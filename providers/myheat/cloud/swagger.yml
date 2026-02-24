@@ -386,7 +386,7 @@ definitions:
               type: "number"
               description: "Текущее значение (температура)"
             target:
-              type: "integer"
+              type: "number"
               description: "Текущее целевое значение"
             demand:
               type: "boolean"

@@ -8,13 +8,15 @@ package models
 import (
 	"context"
 	"encoding/json"
+	stderrors "errors"
 	"strconv"
+
+	extend "github.com/kihamo/boggart/protocols/swagger"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
-	extend "github.com/kihamo/boggart/protocols/swagger"
 )
 
 // ResponseDeviceInfo response device info
@@ -29,7 +31,7 @@ type ResponseDeviceInfo struct {
 	Environments []*ResponseDeviceInfoEnvsItems0 `json:"envs"`
 
 	// Сигналы тревоги (протечки воды, пожарные, охранные, учетка газа и т.д.)
-	Alarms []interface{} `json:"alarms"`
+	Alarms []any `json:"alarms"`
 
 	// Название населенного пункта
 	City string `json:"city,omitempty"`
@@ -41,7 +43,7 @@ type ResponseDeviceInfo struct {
 	Heaters []*ResponseDeviceInfoHeatersItems0 `json:"heaters"`
 
 	// Общий статус системы (включая статусы всех объектов)
-	// Enum: [0 1 32 64]
+	// Enum: [0,1,32,64]
 	Severity int64 `json:"severity,omitempty"`
 
 	// Текстовое описание статуса
@@ -93,11 +95,15 @@ func (m *ResponseDeviceInfo) validateEngineeringEquipment(formats strfmt.Registr
 
 		if m.EngineeringEquipment[i] != nil {
 			if err := m.EngineeringEquipment[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("engs" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("engs" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -119,11 +125,15 @@ func (m *ResponseDeviceInfo) validateEnvironments(formats strfmt.Registry) error
 
 		if m.Environments[i] != nil {
 			if err := m.Environments[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("envs" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("envs" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -145,11 +155,15 @@ func (m *ResponseDeviceInfo) validateHeaters(formats strfmt.Registry) error {
 
 		if m.Heaters[i] != nil {
 			if err := m.Heaters[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("heaters" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("heaters" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -159,7 +173,7 @@ func (m *ResponseDeviceInfo) validateHeaters(formats strfmt.Registry) error {
 	return nil
 }
 
-var responseDeviceInfoTypeSeverityPropEnum []interface{}
+var responseDeviceInfoTypeSeverityPropEnum []any
 
 func init() {
 	var res []int64
@@ -198,11 +212,15 @@ func (m *ResponseDeviceInfo) validateWeatherTemp(formats strfmt.Registry) error 
 	}
 
 	if err := m.WeatherTemp.Validate(formats); err != nil {
-		if ve, ok := err.(*errors.Validation); ok {
+		ve := new(errors.Validation)
+		if stderrors.As(err, &ve) {
 			return ve.ValidateName("weatherTemp")
-		} else if ce, ok := err.(*errors.CompositeError); ok {
+		}
+		ce := new(errors.CompositeError)
+		if stderrors.As(err, &ce) {
 			return ce.ValidateName("weatherTemp")
 		}
+
 		return err
 	}
 
@@ -246,11 +264,15 @@ func (m *ResponseDeviceInfo) contextValidateEngineeringEquipment(ctx context.Con
 			}
 
 			if err := m.EngineeringEquipment[i].ContextValidate(ctx, formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("engs" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("engs" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -271,11 +293,15 @@ func (m *ResponseDeviceInfo) contextValidateEnvironments(ctx context.Context, fo
 			}
 
 			if err := m.Environments[i].ContextValidate(ctx, formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("envs" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("envs" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -296,11 +322,15 @@ func (m *ResponseDeviceInfo) contextValidateHeaters(ctx context.Context, formats
 			}
 
 			if err := m.Heaters[i].ContextValidate(ctx, formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("heaters" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("heaters" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -317,11 +347,15 @@ func (m *ResponseDeviceInfo) contextValidateWeatherTemp(ctx context.Context, for
 	}
 
 	if err := m.WeatherTemp.ContextValidate(ctx, formats); err != nil {
-		if ve, ok := err.(*errors.Validation); ok {
+		ve := new(errors.Validation)
+		if stderrors.As(err, &ve) {
 			return ve.ValidateName("weatherTemp")
-		} else if ce, ok := err.(*errors.CompositeError); ok {
+		}
+		ce := new(errors.CompositeError)
+		if stderrors.As(err, &ce) {
 			return ce.ValidateName("weatherTemp")
 		}
+
 		return err
 	}
 
@@ -419,7 +453,7 @@ type ResponseDeviceInfoEnvsItems0 struct {
 	SeverityDesc string `json:"severityDesc,omitempty"`
 
 	// Текущее целевое значение
-	Target int64 `json:"target,omitempty"`
+	Target float64 `json:"target,omitempty"`
 
 	// type
 	Type string `json:"type,omitempty"`

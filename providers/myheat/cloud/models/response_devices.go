@@ -8,6 +8,7 @@ package models
 import (
 	"context"
 	"encoding/json"
+	stderrors "errors"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -51,11 +52,15 @@ func (m *ResponseDevices) validateDevices(formats strfmt.Registry) error {
 
 		if m.Devices[i] != nil {
 			if err := m.Devices[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("devices" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("devices" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -90,11 +95,15 @@ func (m *ResponseDevices) contextValidateDevices(ctx context.Context, formats st
 			}
 
 			if err := m.Devices[i].ContextValidate(ctx, formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
+				ve := new(errors.Validation)
+				if stderrors.As(err, &ve) {
 					return ve.ValidateName("devices" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
+				}
+				ce := new(errors.CompositeError)
+				if stderrors.As(err, &ce) {
 					return ce.ValidateName("devices" + "." + strconv.Itoa(i))
 				}
+
 				return err
 			}
 		}
@@ -137,7 +146,7 @@ type ResponseDevicesDevicesItems0 struct {
 	Name string `json:"name,omitempty"`
 
 	// Общий статус системы (включая статусы всех объектов)
-	// Enum: [0 1 32 64]
+	// Enum: [0,1,32,64]
 	Severity int64 `json:"severity,omitempty"`
 
 	// Текстовое описание статуса
@@ -158,7 +167,7 @@ func (m *ResponseDevicesDevicesItems0) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-var responseDevicesDevicesItems0TypeSeverityPropEnum []interface{}
+var responseDevicesDevicesItems0TypeSeverityPropEnum []any
 
 func init() {
 	var res []int64
