@@ -17,16 +17,19 @@
                                     <tr>
                                         <th class="md-col-1">{{ i18n "Counter #" . }}</th>
                                         <th class="md-col-1">{{ i18n "Slot #" . }}</th>
+                                        <th class="md-col-1">{{ i18n "Enabled" . }}</th>
                                         <th>{{ i18n "Value" . }}</th>
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {{ range $i, $value := .values }}
-                                    <tr>
-                                        <td>{{ $value.Number }}</td>
-                                        <td>{{ $value.Slot }}</td>
-                                        <td>{{ i18n "%.3f m3" $ nil nil nil $value.Value }}</td>
-                                    </tr>
+                                    {{ range $i, $value := .counter_values }}
+                                        {{ $cfg := (index $.counters_configs $i) }}
+                                        <tr>
+                                            <td>{{ $value.Number }}</td>
+                                            <td>{{ $value.Slot }}</td>
+                                            <td>{{ if $cfg.Enabled }}{{ i18n "yes" . }}{{ else }}{{ i18n "no" . }}{{ end }}</td>
+                                            <td>{{ i18n "%.3f m3" $ nil nil nil $value.Value }}</td>
+                                        </tr>
                                     {{ end }}
                                     </tbody>
                                 </table>

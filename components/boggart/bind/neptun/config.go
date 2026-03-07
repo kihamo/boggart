@@ -15,6 +15,7 @@ type Config struct {
 	ConnectionSlaveID     uint8         `mapstructure:"connection_slave_id" yaml:"connection_slave_id"`
 	ConnectionTimeout     time.Duration `mapstructure:"connection_timeout" yaml:"connection_timeout"`
 	ConnectionIdleTimeout time.Duration `mapstructure:"connection_idle_timeout" yaml:"connection_idle_timeout"`
+	UpdaterInterval       time.Duration `mapstructure:"updater_interval" yaml:"updater_interval"`
 }
 
 func (t Type) ConfigDefaults() interface{} {
@@ -28,5 +29,6 @@ func (t Type) ConfigDefaults() interface{} {
 		ConnectionSlaveID:     240,
 		ConnectionTimeout:     time.Second,
 		ConnectionIdleTimeout: time.Minute,
+		UpdaterInterval:       time.Minute * 5,
 	}
 }

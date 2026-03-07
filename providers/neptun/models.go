@@ -408,17 +408,21 @@ const (
 )
 
 type CounterConfiguration struct {
-	state bool
-	typ   uint
-	error uint
-	step  uint
+	number int
+	slot   int
+	state  bool
+	typ    uint
+	error  uint
+	step   uint
 }
 
-func NewCounterConfiguration(value uint) *CounterConfiguration {
+func newCounterConfiguration(number, slot int, value uint) *CounterConfiguration {
 	cfg := &CounterConfiguration{
-		state: value&0b1 != 0,
-		typ:   (value >> 1) & 0b1,
-		error: (value >> 2) & 0b111111,
+		number: number,
+		slot:   slot,
+		state:  value&0b1 != 0,
+		typ:    (value >> 1) & 0b1,
+		error:  (value >> 2) & 0b111111,
 	}
 
 	step := value >> 8
@@ -449,6 +453,14 @@ func (c *CounterConfiguration) Value() (value uint16) {
 	}
 
 	return value
+}
+
+func (c *CounterConfiguration) Number() int {
+	return c.number
+}
+
+func (c *CounterConfiguration) Slot() int {
+	return c.slot
 }
 
 func (c *CounterConfiguration) State() bool {
@@ -504,4 +516,8 @@ func (c *CounterConfiguration) SetStep(value uint) {
 	case 1, 10, 100:
 		c.step = value
 	}
+}
+
+func (c *CounterConfiguration) String() string {
+	return fmt.Sprintf("counter %d slot %d value %d\n", c.number, c.slot, c.Value())
 }

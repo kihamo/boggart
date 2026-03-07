@@ -171,19 +171,38 @@ func (n *Neptun) CountersValues() ([]*CounterValue, error) {
 	return ret, nil
 }
 
-func (n *Neptun) CounterConfiguration(counter, slot int) (*CounterConfiguration, error) {
-	var address uint16
+func (n *Neptun) CountersConfigurations() ([]*CounterConfiguration, error) {
+	const quantity uint16 = 8
 
-	address, err := n.counterConfigurationAddress(counter, slot)
+	// counters(2) * slots(4) = 8
+	response, err := n.client.ReadHoldingRegisters(AddressCounter1Slot1Configuration, quantity)
 	if err != nil {
 		return nil, err
 	}
 
-	value, err := n.client.ReadHoldingRegistersUint16(address)
-
-	if err != nil {
-		return nil, err
+	if len(response) != int(quantity)*2 {
+		return nil, fmt.Errorf("wrong response payload length %d need %d", len(response), int(quantity)*2)
 	}
 
-	return NewCounterConfiguration(uint(value)), err
+	ret := make([]*CounterConfiguration, 0, 8)
+	counter := 1
+	slot := 1
+
+	for i := 0; i < len(response); i += 2 {
+		ret = append(ret, newCounterConfiguration(counter, slot, uint(binary.BigEndian.Uint16(response[i:i+2]))))
+
+		if counter != 2 {
+			counter++
+		} else {
+			counter = 1
+
+			if slot != 4 {
+				slot++
+			} else {
+				slot = 1
+			}
+		}
+	}
+
+	return ret, nil
 }

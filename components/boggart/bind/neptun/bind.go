@@ -11,8 +11,10 @@ type Bind struct {
 	di.ConfigBind
 	di.LoggerBind
 	di.MetaBind
+	di.MetricsBind
 	di.ProbesBind
 	di.WidgetBind
+	di.WorkersBind
 
 	provider     *neptun.Neptun
 	providerOnce *atomic.Once

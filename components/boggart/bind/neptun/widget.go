@@ -19,9 +19,16 @@ func (b *Bind) WidgetHandler(w *dashboard.Response, r *dashboard.Request) {
 	case "counters":
 		values, err := provider.CountersValues()
 		if err != nil {
-			widget.FlashError(r, "Get module configuration failed with error %v", "", err)
+			widget.FlashError(r, "Get conters values failed with error %v", "", err)
 		} else {
-			vars["values"] = values
+			vars["counter_values"] = values
+		}
+
+		configs, err := provider.CountersConfigurations()
+		if err != nil {
+			widget.FlashError(r, "Get counters configuration failed with error %v", "", err)
+		} else {
+			vars["counters_configs"] = configs
 		}
 
 	default:
