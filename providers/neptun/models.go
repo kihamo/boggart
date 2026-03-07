@@ -1,5 +1,7 @@
 package neptun
 
+import "fmt"
+
 type ModuleConfiguration struct {
 	keyboardLock              bool
 	tapsClosingOnSensorLoss   bool
@@ -370,6 +372,28 @@ func (s *WirelessSensorStatus) Link() uint {
 
 func (s *WirelessSensorStatus) BatteryLevel() uint {
 	return s.batteryLevel
+}
+
+type CounterValue struct {
+	number int
+	slot   int
+	value  float64
+}
+
+func (c *CounterValue) Number() int {
+	return c.number
+}
+
+func (c *CounterValue) Slot() int {
+	return c.slot
+}
+
+func (c *CounterValue) Value() float64 {
+	return c.value
+}
+
+func (c *CounterValue) String() string {
+	return fmt.Sprintf("counter %d slot %d value %f\n", c.number, c.slot, c.value)
 }
 
 const (

@@ -1,5 +1,10 @@
 package neptun
 
+import (
+	"encoding/binary"
+	"fmt"
+)
+
 func (n *Neptun) ModuleConfiguration() (*ModuleConfiguration, error) {
 	value, err := n.client.ReadHoldingRegistersUint16(AddressModuleConfiguration)
 
@@ -118,23 +123,52 @@ func (n *Neptun) WirelessSensorStatus(number int) (*WirelessSensorStatus, error)
 	return NewWirelessSensorStatus(uint(value)), err
 }
 
-func (n *Neptun) CounterValue(counter, slot int) (uint16, uint16, error) {
-	addressHigh, addressLow, err := n.counterValueAddresses(counter, slot)
+func (n *Neptun) CountersValues() ([]*CounterValue, error) {
+	const quantity uint16 = 16
+
+	// counters(2) * slots(4) * bytes(2) = 16
+	response, err := n.client.ReadHoldingRegisters(AddressCounter1Slot1HighValue, quantity)
 	if err != nil {
-		return 0, 0, err
+		return nil, err
 	}
 
-	valueHigh, err := n.client.ReadHoldingRegistersUint16(addressHigh)
-	if err != nil {
-		return 0, 0, err
+	if len(response) != int(quantity)*2 {
+		return nil, fmt.Errorf("wrong response payload length %d need %d", len(response), quantity*2)
 	}
 
-	valueLow, err := n.client.ReadHoldingRegistersUint16(addressLow)
-	if err != nil {
-		return 0, 0, err
+	ret := make([]*CounterValue, 0, 8)
+	counter := 1
+	slot := 1
+
+	// counter 1 slot 1 - 0107 + 0108 00-01
+	// counter 2 slot 1 - 0109 + 0110 02-03
+	// counter 1 slot 2 - 0111 + 0112 04-05
+	// counter 2 slot 2 - 0113 + 0114 06-07
+	// counter 1 slot 3 - 0115 + 0116 08-09
+	// counter 2 slot 3 - 0117 + 0118 10-11
+	// counter 1 slot 4 - 0119 + 0120 12-13
+	// counter 2 slot 4 - 0121 + 0122 14-15
+	for i := 0; i < len(response); i += 4 {
+		ret = append(ret, &CounterValue{
+			number: counter,
+			slot:   slot,
+			value:  float64(binary.BigEndian.Uint32(response[i:i+4])) / 1000,
+		})
+
+		if counter != 2 {
+			counter++
+		} else {
+			counter = 1
+
+			if slot != 4 {
+				slot++
+			} else {
+				slot = 1
+			}
+		}
 	}
 
-	return valueHigh, valueLow, nil
+	return ret, nil
 }
 
 func (n *Neptun) CounterConfiguration(counter, slot int) (*CounterConfiguration, error) {
