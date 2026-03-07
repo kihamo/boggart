@@ -43,13 +43,14 @@ func (d Device) IsSupported(address uint16) bool {
 	switch address {
 	case AddressRoomTemperature, AddressHumidity, AddressTouchLock, AddressWindowsOpen, AddressHolidayFunction,
 		AddressHoldingFunction, AddressBoostFunction, AddressDeviceType, AddressSystemError, AddressTemperatureFormat,
-		AddressStatus, AddressSystemMode, AddressTargetTemperature, AddressAway, AddressAwayTemperature, AddressHoldingTime,
-		AddressHoldingTemperatureAndTime, AddressHoldingTemperature, AddressHolidayStartTimeHigh, AddressHolidayStartTimeLow,
-		AddressHolidayEndTimeHigh, AddressHolidayEndTimeLow, AddressBoostEndTimeHigh, AddressBoostEndTimeLow, AddressBoost,
-		AddressPanelLock, AddressPanelLockPin1, AddressPanelLockPin2, AddressPanelLockPin3, AddressPanelLockPin4,
-		AddressTargetTemperatureMaximum, AddressTargetTemperatureMinimum, AddressScheduleMode:
+		AddressStatus, AddressSystemMode, AddressTargetTemperature, AddressHoldingTime, AddressHoldingTemperatureAndTime,
+		AddressHoldingTemperature, AddressHolidayStartTimeHigh, AddressHolidayStartTimeLow, AddressHolidayEndTimeHigh,
+		AddressHolidayEndTimeLow, AddressBoostEndTimeHigh, AddressBoostEndTimeLow, AddressBoost, AddressPanelLock,
+		AddressPanelLockPin1, AddressPanelLockPin2, AddressPanelLockPin3, AddressPanelLockPin4, AddressTargetTemperatureMaximum,
+		AddressTargetTemperatureMinimum, AddressScheduleMode:
 		return true
-	case AddressFloorTemperature, AddressHeatingOutput, AddressFloorOverheat, AddressFloorTemperatureLimit:
+	case AddressAway, AddressAwayTemperature, AddressFloorTemperature, AddressHeatingOutput, AddressFloorOverheat,
+		AddressFloorTemperatureLimit:
 		return d.IsHA()
 	case AddressHeatingValve, AddressCoolingValve, AddressFanHigh, AddressFanMedium, AddressFanLow, AddressFanSpeedNumbers,
 		AddressFanSpeed:
