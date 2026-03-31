@@ -1,31 +1,22 @@
 switch:
   - platform: gpio
     id: relay_${id}
-    name: Relay ${name}
+    name: Relay ${name} fire
     pin:
       pcf8574: outputs
       number: ${relay}
       mode: OUTPUT
-      inverted: true
+      inverted: ${relay_inverted}
     icon: mdi:toggle-switch-variant
     web_server:
-      sorting_group_id: ${id}
+      sorting_group_id: floor_${id}
       sorting_weight: 1
 
 sensor:
-#  - platform: mqtt_subscribe
-#    id: temperature_room_${id}
-#    name: Temperature room ${name}
-#    topic: "boggart/mc6/villa-thermostat-${topic_postfix}/temperature/room/state"
-#    icon: mdi:home-thermometer
-#    web_server:
-#      sorting_group_id: ${id}
-#      sorting_weight: 2
-#    # todo: script calculate room + floor + target
   - platform: mqtt_subscribe
-    id: temperature_floor_${id}
-    name: Temperature floor ${name}
-    topic: "boggart/mc6/villa-thermostat-${topic_postfix}/temperature/floor/state"
+    id: temperature_current_${id}
+    name: Temperature current ${name}
+    topic: ${topic_current}
     icon: mdi:thermometer-lines
     filters:
       # округляем и усредняем присылаемые значение, чтобы сгладить колебания температуры
@@ -35,7 +26,7 @@ sensor:
           send_every: 3
       - round: 1
     web_server:
-      sorting_group_id: ${id}
+      sorting_group_id: floor_${id}
       sorting_weight: 3
     on_value:
       then:
@@ -43,8 +34,8 @@ sensor:
 
 number:
   - platform: template
-    name: Target temperature floor ${name}
-    id: temperature_floor_target_${id}
+    name: Target temperature ${name}
+    id: temperature_target_${id}
     min_value: ${temperature_target_value_min}
     max_value: ${temperature_target_value_max}
     step: ${temperature_target_step}
@@ -54,7 +45,7 @@ number:
     optimistic: true
     icon: mdi:thermometer-check
     web_server:
-      sorting_group_id: ${id}
+      sorting_group_id: floor_${id}
       sorting_weight: 4
     on_value:
       then:
@@ -66,22 +57,22 @@ script:
   - id: toggle_relay_by_target_temperature_${id}
     then:
       - lambda: |-
-          float floorT = id(temperature_floor_${id}).state;
-          float targetT = id(temperature_floor_target_${id}).state;
+          float currentT = id(temperature_current_${id}).state;
+          float targetT = id(temperature_target_${id}).state;
           auto relay = id(relay_${id}).state;
 
-          // ESP_LOGD("thermostat", "Fire event for ${id}. Floor: %f target: %f relay: %s compare: %s", floorT, targetT, relay ? "ON" : "OFF", targetT > floorT ? "ON" : "OFF");
+          // ESP_LOGD("thermostat", "Fire event for ${id}. Current: %f target: %f relay: %s compare: %s", currentT, targetT, relay ? "ON" : "OFF", targetT > currentT ? "ON" : "OFF");
 
           // включаем нагрев, если до таргета не хватает больше чем 1 градус
-          if (targetT > floorT) {
-            if (relay) {
-              id(relay_${id}).turn_off();
+          if (targetT > currentT) {
+            if (!relay) {
+              id(relay_${id}).turn_on();
 
-              ESP_LOGI("thermostat", "Servo OPEN for ${id}. Floor: %f target: %f relay: %s", floorT, targetT, relay ? "ON" : "OFF");
+              ESP_LOGI("thermostat", "Servo OPEN for ${id}. Current: %f target: %f relay: %s", currentT, targetT, relay ? "ON" : "OFF");
             }
           // если остается меньше одного градус или таргет ниже, то начинаем выключать
-          } else if (!relay) {
-            id(relay_${id}).turn_on();
+          } else if (relay) {
+            id(relay_${id}).turn_off();
 
-            ESP_LOGI("thermostat", "Servo turn CLOSE for ${id}. Floor: %f target: %f relay: %s", floorT, targetT, relay ? "ON" : "OFF");
+            ESP_LOGI("thermostat", "Servo turn CLOSE for ${id}. Current: %f target: %f relay: %s", currentT, targetT, relay ? "ON" : "OFF");
           }

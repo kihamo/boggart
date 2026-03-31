@@ -24,8 +24,10 @@ packages:
   - !include { file: .device_6814_door.yaml, vars: { id : "livingroom_right", name: "Livingroom right", gpio: '6' } }
   - !include { file: .device_6814_door.yaml, vars: { id : "livingroom_left", name: "Livingroom left", gpio: '7' } }
 
-  - !include { file: .device_6814_floor.yaml, vars: { id : "gameroom", name: "Gameroom", relay: 0, topic_postfix: "gameroom" } }
-  - !include { file: .device_6814_floor.yaml, vars: { id : "hallway", name: "Hallway", relay: 2, topic_postfix: "hallway" } }
+  - !include { file: .device_6814_floor.yaml, vars: { id : "sauna", name: "Sauna floor", relay: 4, relay_inverted: false, topic_current: "boggart/mc6/villa-thermostat-sauna/temperature/floor/state" } }
+  - !include { file: .device_6814_floor.yaml, vars: { id : "gameroom", name: "Gameroom floor", relay: 5, relay_inverted: false, topic_current: "boggart/mc6/villa-thermostat-gameroom/temperature/floor/state" } }
+  - !include { file: .device_6814_floor.yaml, vars: { id : "hallway", name: "Hallway floor", relay: 6, relay_inverted: false, topic_current: "boggart/mc6/villa-thermostat-hallway/temperature/floor/state" } }
+  - !include { file: .device_6814_floor.yaml, vars: { id : "kitchen", name: "Kitchen room", relay: 7, relay_inverted: false, topic_current: "boggart/mc6/villa-thermostat-kitchen-vitron/temperature/room/state" } }
 
 esphome:
   comment: !secret device_6814_comment
@@ -36,27 +38,30 @@ web_server:
       name: "Doors"
       sorting_weight: -99
 
-    - id: kitchen
+    - id: floor_kitchen
       name: "Kitchen"
       sorting_weight: -98
-    - id: gameroom
+    - id: floor_gameroom
       name: "Gameroom"
       sorting_weight: -97
-    - id: hallway
+    - id: floor_hallway
       name: "Hallway"
       sorting_weight: -96
-    - id: chillout
+    - id: floor_chillout
       name: "Chillout"
       sorting_weight: -95
-    - id: bathroom_floor_1
+    - id: floor_bathroom_floor_1
       name: "Bathroom floor 1"
       sorting_weight: -94
-    - id: bathroom_floor_2
+    - id: floor_bathroom_floor_2
       name: "Bathroom floor 2"
       sorting_weight: -93
-    - id: bathroom_master
+    - id: floor_bathroom_master
       name: "Bathroom master room"
       sorting_weight: -92
+    - id: floor_sauna
+      name: "Sauna"
+      sorting_weight: -91
 
     - id: inputs_di
       name: "Digital inputs"
