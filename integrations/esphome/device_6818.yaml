@@ -1,6 +1,6 @@
 substitutions:
-  node_name: !secret device_6811_node_name
-  ip_address: !secret device_6811_ip_address
+  node_name: !secret device_6818_node_name
+  ip_address: !secret device_6818_ip_address
 
 packages:
   - !include ./_includes/common.yaml
@@ -13,29 +13,19 @@ packages:
   - !include ./_includes/time.yaml
 
 esphome:
-  comment: !secret device_6811_comment
+  comment: !secret device_6818_comment
 
 esp32:
   board: esp32dev
   framework:
     type: esp-idf
 
-#espnow:
-#  peers: !include ./_includes/espnow/villa_blackrock.yaml
-#  on_receive:
-#    - logger.log:
-#        format: 'Received "%s" from %s: RSSI: %ddBm'
-#        args:
-#          - data
-#          - format_mac_address_pretty(info.src_addr).c_str()
-#          - info.rx_ctrl->rssi
-
 switch:
   - platform: gpio
     name: "Relay switch"
     icon: "mdi:lightbulb_outline"
     pin: GPIO26
-    id: relay_light_perimeter
+    id: relay_1
     restore_mode: RESTORE_DEFAULT_OFF
 
 binary_sensor:
@@ -46,10 +36,9 @@ binary_sensor:
       mode:
         input: true
         pullup: true
-    id: button_pass_through
+    id: button_kitchen
     filters:
       - invert:
       - delayed_off: 50ms
-    on_state:
-      - switch.toggle: relay_light_perimeter
-
+    on_press:
+      - switch.toggle: relay_1

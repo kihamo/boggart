@@ -29,6 +29,9 @@ esp32:
   framework:
     type: esp-idf
 
+#espnow:
+#  peers: !include ./_includes/espnow/villa_blackrock.yaml
+
 uart:
   - id: rs485
     tx_pin: GPIO27

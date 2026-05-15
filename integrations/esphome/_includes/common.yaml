@@ -6,9 +6,10 @@ esphome:
 web_server:
   port: 80
   include_internal: true
-  local: false
+  #local: false
+  local: true
   version: 3
-  js_url: "https://esphome.shosho.ru/v3/www.js"
+  #js_url: "https://esphome.shosho.ru/v3/www.js"
   sorting_groups:
     - id: diagnostic
       name: "Diagnostic"
@@ -20,8 +21,12 @@ web_server:
 prometheus:
 
 logger:
-  level: "INFO"
+  level: "VERBOSE"
+  initial_level: "INFO"
   baud_rate: 0
+#  logs:
+#    mqtt.component: "VERBOSE"
+#    mqtt.client: "VERBOSE"
 
 ota:
   - platform: esphome
@@ -36,3 +41,4 @@ mqtt:
   password: !secret home_mqtt_password
   use_abbreviations: false
   keepalive: 60s
+  reboot_timeout: 0s

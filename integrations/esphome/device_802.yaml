@@ -31,7 +31,7 @@ light:
   - platform: neopixelbus
     num_leds: ${num_leds}
     variant: 800kbps
-    pin: GPIO15
+    pin: D4
     name: "NeoPixel Light"
     id: ${led_id}
     effects:

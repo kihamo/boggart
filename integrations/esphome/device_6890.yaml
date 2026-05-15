@@ -1,0 +1,38 @@
+substitutions:
+  node_name: blackrock-haier-cabinet
+  ip_address: !secret device_6817_ip_address
+  device_id: "cabinet"
+  device_name: "haier black"
+  uart_id: ac_port
+  send_wifi: "true"
+
+packages:
+  - !include ./_includes/common.yaml
+  - !include ./_includes/wifi.yaml
+  - !include ./_includes/wifi/villa_blackrock.yaml
+  - !include ./_includes/binary_sensor.yaml
+  - !include ./_includes/sensor.yaml
+  - !include ./_includes/switch.yaml
+  - !include ./_includes/text_sensor.yaml
+  - !include ./_includes/time.yaml
+  - !include ./external_components/haier-esphome/.haier-hon-base.yaml 
+
+esphome:
+  comment: black
+
+esp32:
+  variant: esp32s2
+  framework:
+    type: esp-idf
+
+uart:
+  baud_rate: 9600
+  tx_pin: 19
+  rx_pin: 18
+  id: ${uart_id}
+
+external_components:
+  - source:
+      type: local
+      path: ./external_components/haier-esphome/components
+    components: [haier]

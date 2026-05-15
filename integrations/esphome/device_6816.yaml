@@ -1,0 +1,277 @@
+substitutions:
+  node_name: !secret device_6816_node_name
+  ip_address: !secret device_6816_ip_address
+
+packages:
+  - !include ./_includes/common.yaml
+  - !include ./_includes/wifi.yaml
+  - !include ./_includes/wifi/villa_blackrock.yaml
+  - !include ./_includes/binary_sensor.yaml
+  - !include ./_includes/sensor.yaml
+  - !include ./_includes/switch.yaml
+  - !include ./_includes/text_sensor.yaml
+  - !include ./_includes/time.yaml
+
+esphome:
+  comment: !secret device_6816_comment
+  on_boot:
+    priority: -10
+    then:
+      - lambda: |-
+          if (id(in_pump_heat_water).state) {
+            id(relay_heat_water).turn_on();
+          } else {
+            id(relay_heat_water).turn_off();
+          }
+
+          if (id(in_pump_floor).state) {
+            id(relay_floor).turn_on();
+          } else {
+            id(relay_floor).turn_off();
+          }
+
+          if (id(in_pump_heating).state) {
+            id(relay_heating).turn_on();
+          } else {
+            id(relay_heating).turn_off();
+          }
+
+          if (id(in_pump_ventilation).state) {
+            id(relay_ventilation).turn_on();
+          } else {
+            id(relay_ventilation).turn_off();
+          }
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+web_server:
+    sorting_groups:
+    - id: inputs_myheat
+      name: "Digital inputs / MyHeat"
+      sorting_weight: -1
+    - id: outputs_pumps
+      name: "Pumps"
+      sorting_weight: -2
+    - id: inputs_di
+      name: "Digital inputs / Free"
+      sorting_weight: -3
+    - id: outputs_relayes
+      name: "Relayes / Free"
+      sorting_weight: -4
+
+uart:
+  - id: rs485
+    tx_pin: GPIO27
+    rx_pin: GPIO14
+    baud_rate: 9600
+  - id: rs232
+    tx_pin: GPIO17
+    rx_pin: GPIO16
+    baud_rate: 9600
+
+spi:
+  clk_pin: GPIO18
+  mosi_pin: GPIO23
+  miso_pin: GPIO19
+  # cs pin: GPIO5
+
+i2c:
+  sda: GPIO4
+  scl:
+    number: GPIO15
+    ignore_strapping_warning: true
+
+pcf8574:
+  - id: inputs
+    address: 0x22
+  - id: outputs
+    address: 0x24
+
+binary_sensor:
+  - platform: gpio
+    name: "Input free 1"
+    id: in_1
+    pin:
+      pcf8574: inputs
+      number: 0
+      mode: INPUT
+      inverted: true
+    web_server:
+      sorting_group_id: inputs_di
+  - platform: gpio
+    name: "Input free 2"
+    id: in_2
+    pin:
+      pcf8574: inputs
+      number: 1
+      mode: INPUT
+      inverted: true
+    web_server:
+      sorting_group_id: inputs_di
+  - platform: gpio
+    name: "Relay supply ventilation | DIO4"
+    id: in_pump_ventilation
+    pin:
+      pcf8574: inputs
+      number: 2
+      mode: INPUT
+      inverted: true
+    on_state:
+      then:
+        - if:
+            condition:
+              binary_sensor.is_on: 
+                id: in_pump_ventilation
+            then:
+              - switch.turn_on: relay_ventilation
+            else:
+              - switch.turn_off: relay_ventilation
+    web_server:
+      sorting_group_id: inputs_myheat
+      sorting_weight: 40
+  - platform: gpio
+    name: "Pump heated floor | DIO3"
+    id: in_pump_floor
+    pin:
+      pcf8574: inputs
+      number: 3
+      mode: INPUT
+      inverted: true
+    on_state:
+      then:
+        - if:
+            condition:
+              binary_sensor.is_on: 
+                id: in_pump_floor
+            then:
+              - switch.turn_on: relay_floor
+            else:
+              - switch.turn_off: relay_floor
+    web_server:
+      sorting_group_id: inputs_myheat
+      sorting_weight: 20
+  - platform: gpio
+    name: "Pump heating | DIO2"
+    id: in_pump_heating
+    pin:
+      pcf8574: inputs
+      number: 4
+      mode: INPUT
+      inverted: true
+    on_state:
+      then:
+        - if:
+            condition:
+              binary_sensor.is_on: 
+                id: in_pump_heating
+            then:
+              - switch.turn_on: relay_heating
+            else:
+              - switch.turn_off: relay_heating
+    web_server:
+      sorting_group_id: inputs_myheat
+      sorting_weight: 30
+  - platform: gpio
+    name: "Pump heat water | DIO 1"
+    id: in_pump_heat_water
+    pin:
+      pcf8574: inputs
+      number: 5
+      mode: INPUT
+      inverted: true
+    on_state:
+      then:
+        - if:
+            condition:
+              binary_sensor.is_on: 
+                id: in_pump_heat_water
+            then:
+              - switch.turn_on: relay_heat_water
+            else:
+              - switch.turn_off: relay_heat_water
+    web_server:
+      sorting_group_id: inputs_myheat
+      sorting_weight: 10
+
+switch:
+  - platform: gpio
+    name: "Relay heated floor"
+    id: relay_floor
+    pin:
+      pcf8574: outputs
+      number: 0
+      mode: OUTPUT
+      inverted: true
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: mdi:toggle-switch-variant
+    web_server:
+      sorting_group_id: outputs_pumps
+      sorting_weight: 20
+  - platform: gpio
+    name: "Relay heating"
+    id: relay_heating
+    pin:
+      pcf8574: outputs
+      number: 1
+      mode: OUTPUT
+      inverted: true
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: mdi:toggle-switch-variant
+    web_server:
+      sorting_group_id: outputs_pumps
+      sorting_weight: 30
+  - platform: gpio
+    name: "Relay heat water"
+    id: relay_heat_water
+    pin:
+      pcf8574: outputs
+      number: 2
+      mode: OUTPUT
+      inverted: true
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: mdi:toggle-switch-variant
+    web_server:
+      sorting_group_id: outputs_pumps
+      sorting_weight: 10
+  - platform: gpio
+    name: "Relay supply ventilation"
+    id: relay_ventilation
+    pin:
+      pcf8574: outputs
+      number: 3
+      mode: OUTPUT
+      inverted: true
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: mdi:toggle-switch-variant
+    web_server:
+      sorting_group_id: outputs_pumps
+      sorting_weight: 40
+  - platform: gpio
+    name: "Relay 5"
+    id: relay_5
+    pin:
+      pcf8574: outputs
+      number: 4
+      mode: OUTPUT
+      inverted: true
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: mdi:toggle-switch-variant
+    web_server:
+      sorting_group_id: outputs_relayes
+      sorting_weight: 10
+  - platform: gpio
+    name: "Relay 6"
+    id: relay_6
+    pin:
+      pcf8574: outputs
+      number: 5
+      mode: OUTPUT
+      inverted: true
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: mdi:toggle-switch-variant
+    web_server:
+      sorting_group_id: outputs_relayes
+      sorting_weight: 10

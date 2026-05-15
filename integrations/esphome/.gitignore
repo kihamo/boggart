@@ -10,3 +10,4 @@
 /secrets.yaml
 /builds/
 *.pyc
+/external_components/haier-esphome/
